@@ -125,12 +125,15 @@ public class MyScriptEditor : Editor
                     EditorGUILayout.PropertyField(pathElementsProperty, true);
                     serializedObject.ApplyModifiedProperties();
 
-                    for(int i=0; i < levelGenerator.pathElements.Length; i++)
+                    if (levelGenerator)
                     {
-                        if(!levelGenerator.pathElements[i])
+                        for (int i = 0; i < levelGenerator.pathElements.Length; i++)
                         {
-                            EditorGUILayout.HelpBox("You forgot to select a path element from your scene", MessageType.Warning);
-                            break;
+                            if (!levelGenerator.pathElements[i])
+                            {
+                                EditorGUILayout.HelpBox("You forgot to select a path element from your scene", MessageType.Warning);
+                                break;
+                            }
                         }
                     }
                 }
