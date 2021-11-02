@@ -25,7 +25,7 @@ public class LevelGenerator : MonoBehaviour
     public int tab = 0;
 #endif
 
-    void Start()
+    void Awake()
     {
         Generate();
     }
@@ -50,33 +50,44 @@ public class LevelGenerator : MonoBehaviour
         {
             GameObject pathElement = Instantiate(pathElements[Random.Range(0, pathElements.Length)], parent, Quaternion.identity);
             parent = pathElement.transform.Find("end_pos").position;
+            Vector3 zero = Vector3.zero;
 
             if (pathElement.name.EndsWith("_L"))
             {
-                if(path.PointsCount > 0)
-                    path.Points[path.PointsCount - 1].ControlSecondLocal = new Vector3(0f, 0f, 0.5f);
-                BGCurvePoint p = new BGCurvePoint(path, pathElement.transform.position);
-                p.ControlType = BGCurvePoint.ControlTypeEnum.BezierIndependant;
-                p.ControlFirstLocal = new Vector3(0f, 0f, -0.5f);
-                path.AddPoint(p);
+                //Work
+                Vector3 controlPointB = new Vector3(0, 0, .5f);
+
+                if (path.PointsCount > 0)
+                    path.Points[path.PointsCount - 1].ControlSecondLocal = controlPointB;
+
+                Vector3 controlPointA = new Vector3(0f, 0f, 0.5f);
+
+                BGCurvePoint _bgp = new BGCurvePoint(path, pathElement.transform.position, BGCurvePoint.ControlTypeEnum.BezierIndependant, controlPointA, zero, false);
+                path.AddPoint(_bgp);
             }
             else if (pathElement.name.EndsWith("_R"))
             {
+                //Work
+                Vector3 controlPointB = new Vector3(0f, 0f, .5f);
+
                 if (path.PointsCount > 0)
-                    path.Points[path.PointsCount - 1].ControlSecondLocal = new Vector3(0f, 0f, -0.5f);
-                BGCurvePoint p = new BGCurvePoint(path, pathElement.transform.position);
-                p.ControlType = BGCurvePoint.ControlTypeEnum.BezierIndependant;
-                p.ControlFirstLocal = new Vector3(0f, 0f, 0.5f);
-                path.AddPoint(p);
+                    path.Points[path.PointsCount - 1].ControlSecondLocal = controlPointB;
+
+                Vector3 controlPointA = new Vector3(0f, 0f, 0.5f);
+                BGCurvePoint _bgp = new BGCurvePoint(path, pathElement.transform.position, BGCurvePoint.ControlTypeEnum.BezierIndependant, controlPointA, zero, false);
+                path.AddPoint(_bgp);
             }
             else
             {
+                //Work
+                Vector3 controlPointB = new Vector3(0f, 0f, .5f);
+
                 if (path.PointsCount > 0)
-                    path.Points[path.PointsCount - 1].ControlSecondLocal = new Vector3(0f, 0f, 0f);
-                BGCurvePoint p = new BGCurvePoint(path, pathElement.transform.position);
-                p.ControlType = BGCurvePoint.ControlTypeEnum.BezierIndependant;
-                p.ControlFirstLocal = new Vector3(0f, 0f, 0f);
-                path.AddPoint(p);
+                    path.Points[path.PointsCount - 1].ControlSecondLocal = controlPointB;
+
+                Vector3 controlPointA = new Vector3(0f, 0f, -0.5f);
+                BGCurvePoint _bgp = new BGCurvePoint(path, pathElement.transform.position, BGCurvePoint.ControlTypeEnum.BezierIndependant, controlPointA, zero, false);
+                path.AddPoint(_bgp);
             }
 
             cumul -= pathElement.transform.localScale.z;

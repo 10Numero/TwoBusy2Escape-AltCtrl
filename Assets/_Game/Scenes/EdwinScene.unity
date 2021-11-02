@@ -354,7 +354,7 @@ MonoBehaviour:
     tangentsSize: 0.7
     tangentsColor: {r: 1, g: 1, b: 1, a: 1}
     tangentsPerSection: 1
-    controlType: 0
+    controlType: 2
     vRay: 0
     lineColor: {r: 1, g: 0, b: 0, a: 1}
     restrictGizmoz: 
@@ -401,7 +401,7 @@ MonoBehaviour:
   mode2D: 0
   closed: 0
   points:
-  - controlType: 0
+  - controlType: 2
     positionLocal: {x: 0, y: 0, z: 0}
     controlFirstLocal: {x: 0, y: 0, z: 0}
     controlSecondLocal: {x: -0, y: -0, z: -0}
@@ -464,7 +464,7 @@ MonoBehaviour:
       bgCurveValues: []
       bgCurvePointComponentValues: []
       bgCurvePointGOValues: []
-  - controlType: 0
+  - controlType: 2
     positionLocal: {x: -1, y: 0, z: 3}
     controlFirstLocal: {x: 0.06682556, y: 0, z: -0.03341278}
     controlSecondLocal: {x: -0.06682556, y: 0, z: 0.03341278}
@@ -499,7 +499,7 @@ MonoBehaviour:
   snapMonitoring: 0
   eventMode: 0
   pointsMode: 0
-  forceChangedEventMode: 0
+  forceChangedEventMode: 2
 --- !u!114 &1237529612
 MonoBehaviour:
   m_ObjectHideFlags: 2
