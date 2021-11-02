@@ -53,6 +53,7 @@ public class BulletShooter : MonoBehaviour
     public void Shooted()
     {
         Debug.Log("shooted");
+        StartCoroutine(Shooting());
     }
 
 
