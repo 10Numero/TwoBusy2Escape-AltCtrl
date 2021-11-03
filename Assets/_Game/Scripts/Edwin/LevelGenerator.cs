@@ -30,12 +30,17 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField]
     public GameObject[] obstacles;
 
+    private class Split
+    {
+        public int start, end;
+        public Split(int start) { this.start = start; end = -1; } // end va etre instancié apres
+    }
+    List<Split> pathSplits = new List<Split>();
+
 #if UNITY_EDITOR
     public const int VAR_SPACE = 6;
     public int tab = 0;
 #endif
-
-    
 
     public static LevelGenerator _instance; 
     void Awake()
@@ -43,11 +48,6 @@ public class LevelGenerator : MonoBehaviour
         _instance = this;
 
         Generate();
-    }
-
-    private void Update()
-    {
-        SwitchLane();
     }
 
     public void Generate()
@@ -68,6 +68,7 @@ public class LevelGenerator : MonoBehaviour
         }    
 
         path.Clear();
+        pathSplits.Clear();
 
         float cumul = randomDistance ? Random.Range(minimumDistance, maximumDistance + 1) : totalDistance;
         Vector3 parent = Vector3.zero;
@@ -94,6 +95,8 @@ public class LevelGenerator : MonoBehaviour
 
                         isObstacleLeftSide = Random.value < 0.5;    // equiprobable
                         isObstacleSpawned = false;
+
+                        pathSplits.Add(new Split(ptIndex));
 
                         AddBGCPoint(isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, false, ref ptIndex);
 
@@ -133,6 +136,8 @@ public class LevelGenerator : MonoBehaviour
                         if (!isObstacleSpawned)
                             Instantiate(obstacles[Random.Range(0, obstacles.Length)], isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, Quaternion.identity);
 
+                        pathSplits[pathSplits.Count - 1].end = ptIndex;
+
                         InstantiateSplitPath(rightPath, leftPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex); // right pour left, et left pour right -> rencontre du split
 
                         parent = isObstacleLeftSide ? leftSplitElement.transform.Find("end_pos").position : rightSplitElement.transform.Find("end_pos").position;
@@ -151,13 +156,6 @@ public class LevelGenerator : MonoBehaviour
                 }
             }
         }
-    }
-
-    public void SwitchLane()
-    {
-        float dist = path.GetComponent<BGCcCursor>().Distance;
-        int closestPoint = path.GetComponent<BGCcMath>().CalcSectionIndexByDistance(dist);
-        Debug.Log(closestPoint);
     }
 
     private void AddBGCPoint(Vector3 position, bool isStraight, ref int ptIndex)
@@ -189,6 +187,32 @@ public class LevelGenerator : MonoBehaviour
         AddBGCPoint(isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, leftPrefab == rightPrefab, ref ptIndex);
 
         cumul -= leftSplitElement.transform.localScale.z; // assuming equal lengths between left and right
+    }
+
+    public void SwitchLane()
+    {
+        int currentIndex = path.GetComponent<BGCcMath>().CalcSectionIndexByDistance(path.GetComponent<BGCcCursor>().Distance);
+        Split nextSplit = null;
+        for (int i = 0; i < pathSplits.Count; i++)
+        {
+            if (currentIndex >= pathSplits[i].start && currentIndex <= pathSplits[i].end)   // on est sur un split actuellement
+                return;
+            if (pathSplits[i].start > currentIndex)
+            {
+                nextSplit = pathSplits[i];
+                break;
+            }
+        }
+
+        if (nextSplit != null)
+        {
+            int cur = nextSplit.start + 1;
+            while (cur <= nextSplit.end)
+            {
+                path.Points[cur].PositionWorld = new Vector3(-path.Points[cur].PositionWorld.x, path.Points[cur].PositionWorld.y, path.Points[cur].PositionWorld.z);
+                cur++;
+            }
+        }
     }
 }
 
