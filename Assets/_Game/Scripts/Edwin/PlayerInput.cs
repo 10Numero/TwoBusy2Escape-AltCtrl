@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PlayerInput : MonoBehaviour
 {
-
     [Header("Joystick")]
     public KeyCode LevierVoieLeft = KeyCode.Z;
     [Header("Joystick Buttons")]
