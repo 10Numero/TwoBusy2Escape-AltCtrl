@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -690,7 +690,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MIN_DISTANCE_BOUND: 1
-  MAX_DISTANCE_BOUND: 100
+  MAX_DISTANCE_BOUND: 3000
   randomDistance: 0
   minimumDistance: 1
   maximumDistance: 100
@@ -698,6 +698,7 @@ MonoBehaviour:
   straightProbability: 0.75
   splitStraightProbability: 0.65
   path: {fileID: 1237529611}
+  curvature: 0.5
   straightPath: {fileID: 7001587538682503214, guid: 12fd8e2981c93b84c921496746589874,
     type: 3}
   leftPath: {fileID: 1810449048473650881, guid: 5054bd7a1e0dcdf40b4908ce6d05464d,

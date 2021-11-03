@@ -1,4 +1,5 @@
 ﻿using BansheeGz.BGSpline.Curve;
+using BansheeGz.BGSpline.Components;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -20,6 +21,8 @@ public class LevelGenerator : MonoBehaviour
 
     public BGCurve path;
 
+    public float curvature = 0.5f;
+
     public GameObject straightPath;
     public GameObject leftPath;
     public GameObject rightPath;
@@ -32,11 +35,20 @@ public class LevelGenerator : MonoBehaviour
     public int tab = 0;
 #endif
 
+    
+
+    public static LevelGenerator _instance; 
     void Awake()
     {
+        _instance = this;
+
         Generate();
     }
-    
+
+    private void Update()
+    {
+        SwitchLane();
+    }
 
     public void Generate()
     {
@@ -63,6 +75,8 @@ public class LevelGenerator : MonoBehaviour
 
         bool isSplit = false, isAtLeastOneStraightOnSplit = false, isAtLeastOneStraigntAfterSplit = false, isObstacleLeftSide = false, isObstacleSpawned = false;
 
+        int ptIndex = 0;
+
         while (cumul > 0)
         {
             if (!isSplit)
@@ -72,7 +86,7 @@ public class LevelGenerator : MonoBehaviour
                     bool isStraight = Random.value <= straightProbability;  // proba normale
 
                     if (isStraight)
-                        InstantiateSimpleStraightPath(straightPath, ref pathElement, ref parent, ref cumul);
+                        InstantiateSimpleStraightPath(straightPath, ref pathElement, ref parent, ref cumul, ref ptIndex);
                     else
                     {
                         leftSplitElement = Instantiate(leftPath, parent, Quaternion.identity);
@@ -81,7 +95,7 @@ public class LevelGenerator : MonoBehaviour
                         isObstacleLeftSide = Random.value < 0.5;    // equiprobable
                         isObstacleSpawned = false;
 
-                        AddBGCPoint(isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, false);
+                        AddBGCPoint(isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, false, ref ptIndex);
 
                         cumul -= leftSplitElement.transform.localScale.z; // assuming equal lengths between left and right
 
@@ -90,7 +104,7 @@ public class LevelGenerator : MonoBehaviour
                 }
                 else
                 {
-                    InstantiateSimpleStraightPath(straightPath, ref pathElement, ref parent, ref cumul);
+                    InstantiateSimpleStraightPath(straightPath, ref pathElement, ref parent, ref cumul, ref ptIndex);
                     isAtLeastOneStraigntAfterSplit = true;
                 }
             }
@@ -102,7 +116,7 @@ public class LevelGenerator : MonoBehaviour
 
                     if (isStraight)
                     {
-                        InstantiateSplitPath(straightPath, straightPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul);
+                        InstantiateSplitPath(straightPath, straightPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex);
 
                         if (!isObstacleSpawned)
                         {
@@ -119,7 +133,7 @@ public class LevelGenerator : MonoBehaviour
                         if (!isObstacleSpawned)
                             Instantiate(obstacles[Random.Range(0, obstacles.Length)], isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, Quaternion.identity);
 
-                        InstantiateSplitPath(rightPath, leftPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul); // right pour left, et left pour right -> rencontre du split
+                        InstantiateSplitPath(rightPath, leftPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex); // right pour left, et left pour right -> rencontre du split
 
                         parent = isObstacleLeftSide ? leftSplitElement.transform.Find("end_pos").position : rightSplitElement.transform.Find("end_pos").position;
                         pathElement = isObstacleLeftSide ? leftSplitElement : rightSplitElement;
@@ -132,38 +146,47 @@ public class LevelGenerator : MonoBehaviour
                 }
                 else
                 {
-                    InstantiateSplitPath(straightPath, straightPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul);
+                    InstantiateSplitPath(straightPath, straightPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex);
                     isAtLeastOneStraightOnSplit = true;
                 }
             }
         }
     }
 
-    private void AddBGCPoint(Vector3 position, bool isStraight)
+    public void SwitchLane()
+    {
+        float dist = path.GetComponent<BGCcCursor>().Distance;
+        int closestPoint = path.GetComponent<BGCcMath>().CalcSectionIndexByDistance(dist);
+        Debug.Log(closestPoint);
+    }
+
+    private void AddBGCPoint(Vector3 position, bool isStraight, ref int ptIndex)
     {
         int c = isStraight ? -1 : 1;
         if (path.PointsCount > 0)
-            path.Points[path.PointsCount - 1].ControlSecondLocal = new Vector3(0f, 0f, -0.5f) * c;
+            path.Points[path.PointsCount - 1].ControlSecondLocal = new Vector3(0f, 0f, -curvature) * c;
 
-        path.AddPoint(new BGCurvePoint(path, position, BGCurvePoint.ControlTypeEnum.BezierIndependant, new Vector3(0f, 0f, 0.5f) * c, Vector3.zero, false));
+        path.AddPoint(new BGCurvePoint(path, position, BGCurvePoint.ControlTypeEnum.BezierIndependant, new Vector3(0f, 0f, curvature) * c, Vector3.zero, false));
+
+        ptIndex++;
     }
     
-    private void InstantiateSimpleStraightPath(GameObject prefab, ref GameObject pathElement, ref Vector3 parent, ref float cumul)
+    private void InstantiateSimpleStraightPath(GameObject prefab, ref GameObject pathElement, ref Vector3 parent, ref float cumul, ref int ptIndex)
     {
         pathElement = Instantiate(prefab, parent, Quaternion.identity);
         parent = pathElement.transform.Find("end_pos").position;
-        AddBGCPoint(pathElement.transform.position, true);
+        AddBGCPoint(pathElement.transform.position, true, ref ptIndex);
         cumul -= pathElement.transform.localScale.z;
     }
 
-    private void InstantiateSplitPath(GameObject leftPrefab, GameObject rightPrefab, bool isObstacleLeftSide, ref GameObject leftSplitElement, ref GameObject rightSplitElement, ref float cumul)
+    private void InstantiateSplitPath(GameObject leftPrefab, GameObject rightPrefab, bool isObstacleLeftSide, ref GameObject leftSplitElement, ref GameObject rightSplitElement, ref float cumul, ref int ptIndex)
     {
         Vector3 leftParent = leftSplitElement.transform.Find("end_pos").position;
         leftSplitElement = Instantiate(leftPrefab, leftParent, Quaternion.identity);
         Vector3 rightParent = rightSplitElement.transform.Find("end_pos").position;
         rightSplitElement = Instantiate(rightPrefab, rightParent, Quaternion.identity);
 
-        AddBGCPoint(isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, leftPrefab == rightPrefab);
+        AddBGCPoint(isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, leftPrefab == rightPrefab, ref ptIndex);
 
         cumul -= leftSplitElement.transform.localScale.z; // assuming equal lengths between left and right
     }
@@ -211,6 +234,9 @@ public class MyScriptEditor : Editor
                     levelGenerator.path = (BGCurve)EditorGUILayout.ObjectField("BGCurve Path", levelGenerator.path, typeof(BGCurve), true);
                     if(!levelGenerator.path)
                         EditorGUILayout.HelpBox("You forgot to select the BGCurve element", MessageType.Warning);
+
+                    GUILayout.Space(LevelGenerator.VAR_SPACE);
+                    levelGenerator.curvature = EditorGUILayout.Slider("Curvature", levelGenerator.curvature, 0f, 1f);
 
                     GUILayout.Space(LevelGenerator.VAR_SPACE);
                     levelGenerator.straightPath = (GameObject)EditorGUILayout.ObjectField("Straight Path", levelGenerator.straightPath, typeof(GameObject), true);
