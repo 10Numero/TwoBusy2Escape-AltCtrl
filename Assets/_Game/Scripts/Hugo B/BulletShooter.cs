@@ -9,9 +9,14 @@ public class BulletShooter : MonoBehaviour
     private float _Timer;
     public float TimetoDodge;
     
- 
-
     public bool Sheltered = false;
+
+    public static BulletShooter _instance;
+    void Awake()
+    {
+        if (_instance == null) _instance = this; 
+        else Destroy(this.gameObject);
+    }
 
     public void Start()
     {
@@ -19,16 +24,12 @@ public class BulletShooter : MonoBehaviour
     }
 
     
-
-
     IEnumerator Shooting()
     {
         _Timer = Random.Range(TimerA, TimerB);
         yield return new WaitForSeconds(_Timer);
         
-
         StartCoroutine(Dodge());
-
     }
 
     IEnumerator Dodge()
@@ -45,14 +46,12 @@ public class BulletShooter : MonoBehaviour
 
     public void Sheltering()
     {
-        
         StopCoroutine(Dodge());
         StartCoroutine(Shooting());
     }
 
     public void Shooted()
     {
-        Debug.Log("shooted");
         StartCoroutine(Shooting());
     }
 
