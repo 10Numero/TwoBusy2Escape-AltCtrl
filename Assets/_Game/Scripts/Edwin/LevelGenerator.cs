@@ -45,11 +45,16 @@ public class LevelGenerator : MonoBehaviour
     public static LevelGenerator _instance; 
     void Awake()
     {
-        _instance = this;
+        if (_instance == null)
+        {
+            _instance = this;
 
-        Generate();
+            Generate();
+        }
+        else Destroy(this.gameObject);
     }
 
+    #region Generate
     public void Generate()
     {
         if (!path)
@@ -70,6 +75,23 @@ public class LevelGenerator : MonoBehaviour
         path.Clear();
         pathSplits.Clear();
 
+        #region SpawnParents
+        GameObject temp = new GameObject();
+
+        Transform levelParent = Instantiate(temp, Vector3.zero, Quaternion.identity).transform;
+        levelParent.name = "_LEVEL_";
+
+        Transform pathParent = Instantiate(temp, Vector3.zero, Quaternion.identity).transform;
+        pathParent.parent = levelParent;
+        pathParent.name = "Path";
+
+        Transform obstaclesParent = Instantiate(temp, Vector3.zero, Quaternion.identity).transform;
+        obstaclesParent.parent = levelParent;
+        obstaclesParent.name = "Obstacles";
+
+        Destroy(temp);
+        #endregion
+
         float cumul = randomDistance ? Random.Range(minimumDistance, maximumDistance + 1) : totalDistance;
         Vector3 parent = Vector3.zero;
         GameObject pathElement = null, leftSplitElement = null, rightSplitElement = null;
@@ -87,11 +109,16 @@ public class LevelGenerator : MonoBehaviour
                     bool isStraight = Random.value <= straightProbability;  // proba normale
 
                     if (isStraight)
+                    {
                         InstantiateSimpleStraightPath(straightPath, ref pathElement, ref parent, ref cumul, ref ptIndex);
+                        pathElement.transform.parent = pathParent;
+                    }
                     else
                     {
                         leftSplitElement = Instantiate(leftPath, parent, Quaternion.identity);
+                        leftSplitElement.transform.parent = pathParent;
                         rightSplitElement = Instantiate(rightPath, parent, Quaternion.identity);
+                        rightSplitElement.transform.parent = pathParent;
 
                         isObstacleLeftSide = Random.value < 0.5;    // equiprobable
                         isObstacleSpawned = false;
@@ -108,6 +135,7 @@ public class LevelGenerator : MonoBehaviour
                 else
                 {
                     InstantiateSimpleStraightPath(straightPath, ref pathElement, ref parent, ref cumul, ref ptIndex);
+                    pathElement.transform.parent = pathParent;
                     isAtLeastOneStraigntAfterSplit = true;
                 }
             }
@@ -120,13 +148,17 @@ public class LevelGenerator : MonoBehaviour
                     if (isStraight)
                     {
                         InstantiateSplitPath(straightPath, straightPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex);
+                        leftSplitElement.transform.parent = pathParent;
+                        rightSplitElement.transform.parent = pathParent;
 
                         if (!isObstacleSpawned)
                         {
                             bool spawnObstacleHere = Random.value < 0.5; // equiprobable
                             if (spawnObstacleHere)
                             {
-                                Instantiate(obstacles[Random.Range(0, obstacles.Length)], isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, Quaternion.identity);
+                                Transform obs = Instantiate(obstacles[Random.Range(0, obstacles.Length)], isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, Quaternion.identity).transform;
+                                obs.parent = obstaclesParent;
+                                
                                 isObstacleSpawned = true;
                             }
                         }
@@ -134,11 +166,16 @@ public class LevelGenerator : MonoBehaviour
                     else
                     {
                         if (!isObstacleSpawned)
-                            Instantiate(obstacles[Random.Range(0, obstacles.Length)], isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, Quaternion.identity);
+                        {
+                            Transform obs = Instantiate(obstacles[Random.Range(0, obstacles.Length)], isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, Quaternion.identity).transform;
+                            obs.parent = obstaclesParent;
+                        }
 
                         pathSplits[pathSplits.Count - 1].end = ptIndex;
 
                         InstantiateSplitPath(rightPath, leftPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex); // right pour left, et left pour right -> rencontre du split
+                        leftSplitElement.transform.parent = pathParent;
+                        rightSplitElement.transform.parent = pathParent;
 
                         parent = isObstacleLeftSide ? leftSplitElement.transform.Find("end_pos").position : rightSplitElement.transform.Find("end_pos").position;
                         pathElement = isObstacleLeftSide ? leftSplitElement : rightSplitElement;
@@ -152,6 +189,8 @@ public class LevelGenerator : MonoBehaviour
                 else
                 {
                     InstantiateSplitPath(straightPath, straightPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex);
+                    leftSplitElement.transform.parent = pathParent;
+                    rightSplitElement.transform.parent = pathParent;
                     isAtLeastOneStraightOnSplit = true;
                 }
             }
@@ -188,8 +227,9 @@ public class LevelGenerator : MonoBehaviour
 
         cumul -= leftSplitElement.transform.localScale.z; // assuming equal lengths between left and right
     }
+    #endregion
 
-    public void SwitchLane()
+    public void SwitchLane(bool left)
     {
         int currentIndex = path.GetComponent<BGCcMath>().CalcSectionIndexByDistance(path.GetComponent<BGCcCursor>().Distance);
         Split nextSplit = null;
@@ -206,10 +246,11 @@ public class LevelGenerator : MonoBehaviour
 
         if (nextSplit != null)
         {
+            int sign = left ? 1 : -1;
             int cur = nextSplit.start + 1;
             while (cur <= nextSplit.end)
             {
-                path.Points[cur].PositionWorld = new Vector3(-path.Points[cur].PositionWorld.x, path.Points[cur].PositionWorld.y, path.Points[cur].PositionWorld.z);
+                path.Points[cur].PositionWorld = new Vector3(Mathf.Abs(path.Points[cur].PositionWorld.x) * sign, path.Points[cur].PositionWorld.y, path.Points[cur].PositionWorld.z);
                 cur++;
             }
         }
