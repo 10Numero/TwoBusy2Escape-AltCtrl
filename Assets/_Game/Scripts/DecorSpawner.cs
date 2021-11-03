@@ -12,7 +12,7 @@ public class DecorSpawner : MonoBehaviour
     {
         foreach(Transform t in spawnPoints)
         {
-            
+            //Spawner le decor
         }
     }
 }
