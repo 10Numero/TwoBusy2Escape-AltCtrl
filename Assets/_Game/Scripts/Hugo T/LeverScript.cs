@@ -7,7 +7,7 @@ public class LeverScript : MonoBehaviour
 
     [SerializeField] private float timer;
     [SerializeField] private float firstTime;
-    public float delta;
+    [SerializeField] private float delta;
     public float cycleTime;
 
     // Start is called before the first frame update
