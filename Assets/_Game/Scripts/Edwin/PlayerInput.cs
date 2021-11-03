@@ -61,8 +61,6 @@ public class PlayerInput : MonoBehaviour
         }
         else if (BulletShooter._instance.Sheltered)
             BulletShooter._instance.Sheltered = false;
-
-        Debug.Log(BulletShooter._instance.Sheltered);
     }
 
     #region ChangeLane

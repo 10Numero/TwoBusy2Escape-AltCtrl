@@ -246,7 +246,7 @@ public class LevelGenerator : MonoBehaviour
 
         if (nextSplit != null)
         {
-            int sign = left ? 1 : -1;
+            int sign = left ? -1 : 1;
             int cur = nextSplit.start + 1;
             while (cur <= nextSplit.end)
             {
