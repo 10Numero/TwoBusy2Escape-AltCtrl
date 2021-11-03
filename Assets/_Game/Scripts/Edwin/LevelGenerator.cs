@@ -1,4 +1,5 @@
 ﻿using BansheeGz.BGSpline.Curve;
+using BansheeGz.BGSpline.Components;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -15,83 +16,179 @@ public class LevelGenerator : MonoBehaviour
     public int maximumDistance = 100;
     public int totalDistance = 50;
 
+    public float straightProbability = 0.9f;
+    public float splitStraightProbability = 0.8f;
+
     public BGCurve path;
 
+    public float curvature = 0.5f;
+
+    public GameObject straightPath;
+    public GameObject leftPath;
+    public GameObject rightPath;
+
     [SerializeField]
-    public GameObject[] pathElements;
+    public GameObject[] obstacles;
 
 #if UNITY_EDITOR
     public const int VAR_SPACE = 6;
     public int tab = 0;
 #endif
 
+    
+
+    public static LevelGenerator _instance; 
     void Awake()
     {
+        _instance = this;
+
         Generate();
     }
-    
+
+    private void Update()
+    {
+        SwitchLane();
+    }
 
     public void Generate()
     {
         if (!path)
-            throw new System.Exception("You forgot to select the BGCurve element from your scene");
+            throw new System.Exception("You forgot to select the BGCurve element");
 
-        for (int i = 0; i < pathElements.Length; i++)
+        if (!straightPath || !leftPath || !rightPath)
+            throw new System.Exception("You forgot to select some path elements");
+
+        if(obstacles.Length == 0)
+            throw new System.Exception("Obstacles array cannot be empty");
+
+        foreach (GameObject obstacle in obstacles)
         {
-            if (!pathElements[i])
-                throw new System.Exception("You forgot to select a path element from your scene");
-        }
+            if(!obstacle)
+                throw new System.Exception("You forgot to select some obstacles elements");
+        }    
 
         path.Clear();
 
         float cumul = randomDistance ? Random.Range(minimumDistance, maximumDistance + 1) : totalDistance;
         Vector3 parent = Vector3.zero;
-        while(cumul > 0)
+        GameObject pathElement = null, leftSplitElement = null, rightSplitElement = null;
+
+        bool isSplit = false, isAtLeastOneStraightOnSplit = false, isAtLeastOneStraigntAfterSplit = false, isObstacleLeftSide = false, isObstacleSpawned = false;
+
+        int ptIndex = 0;
+
+        while (cumul > 0)
         {
-            GameObject pathElement = Instantiate(pathElements[Random.Range(0, pathElements.Length)], parent, Quaternion.identity);
-            parent = pathElement.transform.Find("end_pos").position;
-            Vector3 zero = Vector3.zero;
-
-            if (pathElement.name.EndsWith("_L"))
+            if (!isSplit)
             {
-                //Work
-                Vector3 controlPointB = new Vector3(0, 0, .5f);
+                if (isAtLeastOneStraigntAfterSplit)
+                {
+                    bool isStraight = Random.value <= straightProbability;  // proba normale
 
-                if (path.PointsCount > 0)
-                    path.Points[path.PointsCount - 1].ControlSecondLocal = controlPointB;
+                    if (isStraight)
+                        InstantiateSimpleStraightPath(straightPath, ref pathElement, ref parent, ref cumul, ref ptIndex);
+                    else
+                    {
+                        leftSplitElement = Instantiate(leftPath, parent, Quaternion.identity);
+                        rightSplitElement = Instantiate(rightPath, parent, Quaternion.identity);
 
-                Vector3 controlPointA = new Vector3(0f, 0f, 0.5f);
+                        isObstacleLeftSide = Random.value < 0.5;    // equiprobable
+                        isObstacleSpawned = false;
 
-                BGCurvePoint _bgp = new BGCurvePoint(path, pathElement.transform.position, BGCurvePoint.ControlTypeEnum.BezierIndependant, controlPointA, zero, false);
-                path.AddPoint(_bgp);
-            }
-            else if (pathElement.name.EndsWith("_R"))
-            {
-                //Work
-                Vector3 controlPointB = new Vector3(0f, 0f, .5f);
+                        AddBGCPoint(isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, false, ref ptIndex);
 
-                if (path.PointsCount > 0)
-                    path.Points[path.PointsCount - 1].ControlSecondLocal = controlPointB;
+                        cumul -= leftSplitElement.transform.localScale.z; // assuming equal lengths between left and right
 
-                Vector3 controlPointA = new Vector3(0f, 0f, 0.5f);
-                BGCurvePoint _bgp = new BGCurvePoint(path, pathElement.transform.position, BGCurvePoint.ControlTypeEnum.BezierIndependant, controlPointA, zero, false);
-                path.AddPoint(_bgp);
+                        isSplit = true;
+                    }
+                }
+                else
+                {
+                    InstantiateSimpleStraightPath(straightPath, ref pathElement, ref parent, ref cumul, ref ptIndex);
+                    isAtLeastOneStraigntAfterSplit = true;
+                }
             }
             else
             {
-                //Work
-                Vector3 controlPointB = new Vector3(0f, 0f, .5f);
+                if (isAtLeastOneStraightOnSplit)
+                {
+                    bool isStraight = Random.value <= splitStraightProbability; // proba si split
 
-                if (path.PointsCount > 0)
-                    path.Points[path.PointsCount - 1].ControlSecondLocal = controlPointB;
+                    if (isStraight)
+                    {
+                        InstantiateSplitPath(straightPath, straightPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex);
 
-                Vector3 controlPointA = new Vector3(0f, 0f, -0.5f);
-                BGCurvePoint _bgp = new BGCurvePoint(path, pathElement.transform.position, BGCurvePoint.ControlTypeEnum.BezierIndependant, controlPointA, zero, false);
-                path.AddPoint(_bgp);
+                        if (!isObstacleSpawned)
+                        {
+                            bool spawnObstacleHere = Random.value < 0.5; // equiprobable
+                            if (spawnObstacleHere)
+                            {
+                                Instantiate(obstacles[Random.Range(0, obstacles.Length)], isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, Quaternion.identity);
+                                isObstacleSpawned = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (!isObstacleSpawned)
+                            Instantiate(obstacles[Random.Range(0, obstacles.Length)], isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, Quaternion.identity);
+
+                        InstantiateSplitPath(rightPath, leftPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex); // right pour left, et left pour right -> rencontre du split
+
+                        parent = isObstacleLeftSide ? leftSplitElement.transform.Find("end_pos").position : rightSplitElement.transform.Find("end_pos").position;
+                        pathElement = isObstacleLeftSide ? leftSplitElement : rightSplitElement;
+
+                        isAtLeastOneStraigntAfterSplit = false;
+                        isAtLeastOneStraightOnSplit = false;
+                        isObstacleSpawned = false;
+                        isSplit = false;
+                    }
+                }
+                else
+                {
+                    InstantiateSplitPath(straightPath, straightPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex);
+                    isAtLeastOneStraightOnSplit = true;
+                }
             }
-
-            cumul -= pathElement.transform.localScale.z;
         }
+    }
+
+    public void SwitchLane()
+    {
+        float dist = path.GetComponent<BGCcCursor>().Distance;
+        int closestPoint = path.GetComponent<BGCcMath>().CalcSectionIndexByDistance(dist);
+        Debug.Log(closestPoint);
+    }
+
+    private void AddBGCPoint(Vector3 position, bool isStraight, ref int ptIndex)
+    {
+        int c = isStraight ? -1 : 1;
+        if (path.PointsCount > 0)
+            path.Points[path.PointsCount - 1].ControlSecondLocal = new Vector3(0f, 0f, -curvature) * c;
+
+        path.AddPoint(new BGCurvePoint(path, position, BGCurvePoint.ControlTypeEnum.BezierIndependant, new Vector3(0f, 0f, curvature) * c, Vector3.zero, false));
+
+        ptIndex++;
+    }
+    
+    private void InstantiateSimpleStraightPath(GameObject prefab, ref GameObject pathElement, ref Vector3 parent, ref float cumul, ref int ptIndex)
+    {
+        pathElement = Instantiate(prefab, parent, Quaternion.identity);
+        parent = pathElement.transform.Find("end_pos").position;
+        AddBGCPoint(pathElement.transform.position, true, ref ptIndex);
+        cumul -= pathElement.transform.localScale.z;
+    }
+
+    private void InstantiateSplitPath(GameObject leftPrefab, GameObject rightPrefab, bool isObstacleLeftSide, ref GameObject leftSplitElement, ref GameObject rightSplitElement, ref float cumul, ref int ptIndex)
+    {
+        Vector3 leftParent = leftSplitElement.transform.Find("end_pos").position;
+        leftSplitElement = Instantiate(leftPrefab, leftParent, Quaternion.identity);
+        Vector3 rightParent = rightSplitElement.transform.Find("end_pos").position;
+        rightSplitElement = Instantiate(rightPrefab, rightParent, Quaternion.identity);
+
+        AddBGCPoint(isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, leftPrefab == rightPrefab, ref ptIndex);
+
+        cumul -= leftSplitElement.transform.localScale.z; // assuming equal lengths between left and right
     }
 }
 
@@ -104,7 +201,7 @@ public class MyScriptEditor : Editor
         LevelGenerator levelGenerator = target as LevelGenerator;
 
         SerializedObject serializedObject = new SerializedObject(target);
-        SerializedProperty pathElementsProperty = serializedObject.FindProperty("pathElements");
+        SerializedProperty obstaclesPproperty = serializedObject.FindProperty("obstacles");
 
         levelGenerator.tab = GUILayout.Toolbar(levelGenerator.tab, new string[] { "Generator", "Settings" });
         switch (levelGenerator.tab)
@@ -128,21 +225,40 @@ public class MyScriptEditor : Editor
                     }
 
                     GUILayout.Space(LevelGenerator.VAR_SPACE);
+                    levelGenerator.straightProbability = EditorGUILayout.Slider("Straight Path Probability", levelGenerator.straightProbability, 0f, 1f);
+
+                    GUILayout.Space(LevelGenerator.VAR_SPACE);
+                    levelGenerator.splitStraightProbability = EditorGUILayout.Slider("Split Path Straight Probability", levelGenerator.splitStraightProbability, 0f, 1f);
+
+                    GUILayout.Space(LevelGenerator.VAR_SPACE);
                     levelGenerator.path = (BGCurve)EditorGUILayout.ObjectField("BGCurve Path", levelGenerator.path, typeof(BGCurve), true);
                     if(!levelGenerator.path)
-                        EditorGUILayout.HelpBox("You forgot to select the BGCurve element from your scene", MessageType.Warning);
+                        EditorGUILayout.HelpBox("You forgot to select the BGCurve element", MessageType.Warning);
+
+                    GUILayout.Space(LevelGenerator.VAR_SPACE);
+                    levelGenerator.curvature = EditorGUILayout.Slider("Curvature", levelGenerator.curvature, 0f, 1f);
+
+                    GUILayout.Space(LevelGenerator.VAR_SPACE);
+                    levelGenerator.straightPath = (GameObject)EditorGUILayout.ObjectField("Straight Path", levelGenerator.straightPath, typeof(GameObject), true);
+                    levelGenerator.leftPath = (GameObject)EditorGUILayout.ObjectField("Left Path", levelGenerator.leftPath, typeof(GameObject), true);
+                    levelGenerator.rightPath = (GameObject)EditorGUILayout.ObjectField("Right Path", levelGenerator.rightPath, typeof(GameObject), true);
+
+                    if (!levelGenerator.straightPath || !levelGenerator.leftPath || !levelGenerator.rightPath)
+                        EditorGUILayout.HelpBox("You forgot to select some path elements ", MessageType.Warning);
 
                     serializedObject.Update();
-                    EditorGUILayout.PropertyField(pathElementsProperty, true);
+                    EditorGUILayout.PropertyField(obstaclesPproperty, true);
                     serializedObject.ApplyModifiedProperties();
 
-                    if (levelGenerator)
+                    if (!levelGenerator || levelGenerator.obstacles.Length == 0)
+                        EditorGUILayout.HelpBox("You need to have at least one obstacle", MessageType.Warning);
+                    else if(levelGenerator)
                     {
-                        for (int i = 0; i < levelGenerator.pathElements.Length; i++)
+                        foreach (GameObject obstacle in levelGenerator.obstacles)
                         {
-                            if (!levelGenerator.pathElements[i])
+                            if (!obstacle)
                             {
-                                EditorGUILayout.HelpBox("You forgot to select a path element from your scene", MessageType.Warning);
+                                EditorGUILayout.HelpBox("You forgot to select some obstacles elements", MessageType.Warning);
                                 break;
                             }
                         }
