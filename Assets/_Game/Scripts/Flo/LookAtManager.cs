@@ -6,8 +6,9 @@ using UnityEngine;
 public class LookAtManager : MonoBehaviour
 {
     public static LookAtManager instance;
-    public List<GameObject> decors;
+    private List<GameObject> _decors;
     public GameObject wagon;
+
     void Awake()
     {
         instance = this;
@@ -15,12 +16,10 @@ public class LookAtManager : MonoBehaviour
 
     private void Update()
     {
-        foreach(GameObject go in decors)
-        {
+        foreach(GameObject go in _decors)
             go.transform.LookAt(wagon.transform);
-        }
     }
 
-    public void Register(GameObject decor) => decors.Add(decor);
-    public void Unregister(GameObject decor) => decors.Remove(decor);
+    public void Register(GameObject decor) => _decors.Add(decor);
+    public void Unregister(GameObject decor) => _decors.Remove(decor);
 }
