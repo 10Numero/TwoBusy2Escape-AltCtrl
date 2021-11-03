@@ -8,7 +8,7 @@ using UnityEngine;
 public class LevelGenerator : MonoBehaviour
 {
     public int MIN_DISTANCE_BOUND = 1; // pour les GDs
-    public int MAX_DISTANCE_BOUND = 100; // pour les GDs
+    public int MAX_DISTANCE_BOUND = 3000; // pour les GDs
 
     public bool randomDistance = false;
 
@@ -33,7 +33,7 @@ public class LevelGenerator : MonoBehaviour
     private class Split
     {
         public int start, end;
-        public Split(int start) { this.start = start; end = -1; } // end va etre instancié apres
+        public Split(int start) { this.start = start; end = -1; } // end va etre instancié après
     }
     List<Split> pathSplits = new List<Split>();
 

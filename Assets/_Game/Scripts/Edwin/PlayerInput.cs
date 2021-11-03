@@ -16,63 +16,62 @@ public class PlayerInput : MonoBehaviour
     private float timer = 0f, prevTimer = 0f, delta = 0f, period = 0f;
 
     [Header("Joystick")]
-    public KeyCode LeverVoieLeft = KeyCode.Z;
-
+    [SerializeField] private KeyCode LeverLaneLeft = KeyCode.Z;
     [Header("Joystick Buttons")]
-    public KeyCode LeverVoieRight = KeyCode.A;
+    [SerializeField] private KeyCode LeverLaneRight = KeyCode.A;
 
     [Header("Button 1")]
-    public KeyCode LeverLeftPlayerA = KeyCode.R;
+    [SerializeField] private KeyCode LeverLeftPlayerA = KeyCode.R;
     [Header("Button 2")]
-    public KeyCode LeverRightPlayerA = KeyCode.F;
+    [SerializeField] private KeyCode LeverRightPlayerA = KeyCode.F;
     [Header("Button 3")]
-    public KeyCode LeverDownPlayerA = KeyCode.E;
+    [SerializeField] private KeyCode LeverDownPlayerA = KeyCode.E;
 
     [Header("Button 4")]
-    public KeyCode LeverLeftPlayerB = KeyCode.T;
+    [SerializeField] private KeyCode LeverLeftPlayerB = KeyCode.T;
     [Header("Button 5")]
-    public KeyCode LeverRightPlayerB = KeyCode.G;
+    [SerializeField] private KeyCode LeverRightPlayerB = KeyCode.G;
     [Header("Button 6")]
-    public KeyCode LeverDownPlayerB = KeyCode.Y;
+    [SerializeField] private KeyCode LeverDownPlayerB = KeyCode.Y;
 
     [Header("Button 7")]
-    public KeyCode HandDodgeLeft = KeyCode.U;
+    [SerializeField] private KeyCode HandDodgeLeft = KeyCode.U;
     [Header("Button 8")]
-    public KeyCode HandDodgeRight = KeyCode.I;
+    [SerializeField] private KeyCode HandDodgeRight = KeyCode.I;
 
     [Header("Button 9")]
-    public KeyCode KneeDodge = KeyCode.O;
+    [SerializeField] private KeyCode KneeDodge = KeyCode.O;
 
     [Header("Button 10")]
-    public KeyCode HeadDodge = KeyCode.P;
+    [SerializeField] private KeyCode HeadDodge = KeyCode.P;
 
+    public static PlayerInput _instance;
+    void Awake()
+    {
+        if (_instance == null) _instance = this;
+        else Destroy(this.gameObject);
+    }
 
     void Update()
     {
         LeverMain();
 
-        LeverLaneLeft();
-        LeverLaneRight();
+        LeverLeftLane();
+        LeverRightLane();
 
-        if (DodgeHand() && DodgeKnee() && DodgeHead())
-        {
-            if(!BulletShooter._instance.Sheltered)
-                BulletShooter._instance.Sheltered = true;
-        }
-        else if (BulletShooter._instance.Sheltered)
-            BulletShooter._instance.Sheltered = false;
+        Dodge();
     }
 
     #region ChangeLane
-    private void LeverLaneLeft()
+    private void LeverLeftLane()
     {
-        if (Input.GetKeyDown(LeverVoieLeft))
+        if (Input.GetKeyDown(LeverLaneLeft))
             LevelGenerator._instance.SwitchLane(true);
     }
 
-    private void LeverLaneRight()
+    private void LeverRightLane()
     {
-        if (Input.GetKeyDown(LeverVoieRight))
+        if (Input.GetKeyDown(LeverLaneRight))
             LevelGenerator._instance.SwitchLane(false);
     }
     #endregion
@@ -148,6 +147,17 @@ public class PlayerInput : MonoBehaviour
     #endregion
 
     #region Dodge
+    private void Dodge()
+    {
+        if (DodgeHand() && DodgeKnee() && DodgeHead())
+        {
+            if (!SheriffFireController._instance.hasDodged)
+                SheriffFireController._instance.hasDodged = true;
+        }
+        else if (SheriffFireController._instance.hasDodged)
+            SheriffFireController._instance.hasDodged = false;
+    }
+
     private bool DodgeHand()
     {
         return Input.GetKey(HandDodgeLeft) && Input.GetKey(HandDodgeRight);

@@ -5,9 +5,6 @@ using UnityEngine.Events;
 
 public class EventManager : MonoBehaviour
 {
-    private EventManager _instance;
-    public static EventManager instance { get { return instance; } }
-
     public UnityEvent OnWarningStart;
     public UnityEvent OnWarningStop;
     public UnityEvent OnSheriffShoot;
@@ -16,17 +13,22 @@ public class EventManager : MonoBehaviour
     public UnityEvent OnLostOneLife;
     public UnityEvent OnDisplaysLengthChanged;
 
+    public static EventManager instance;
     void Awake()
     {
-        _instance = this;
+        if (instance == null)
+        {
+            instance = this;
 
-        OnSheriffShoot.AddListener(_SheriffShoot);
-        OnLostOneLife.AddListener(_LostLife);
-        OnGameLoose.AddListener(_Loose);
-        OnGameWin.AddListener(_Win);
-        OnWarningStart.AddListener(_WarningStart);
-        OnWarningStop.AddListener(_WarningStop);
-        OnDisplaysLengthChanged.AddListener(_DisplaysUpdate);
+            OnSheriffShoot.AddListener(_SheriffShoot);
+            OnLostOneLife.AddListener(_LostLife);
+            OnGameLoose.AddListener(_Loose);
+            OnGameWin.AddListener(_Win);
+            OnWarningStart.AddListener(_WarningStart);
+            OnWarningStop.AddListener(_WarningStop);
+            OnDisplaysLengthChanged.AddListener(_DisplaysUpdate);
+        }
+        else Destroy(this.gameObject);
     }
 
     void _DisplaysUpdate()
