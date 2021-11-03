@@ -7,6 +7,7 @@ public class LookAtManager : MonoBehaviour
 {
     public static LookAtManager instance;
     public List<GameObject> decors;
+    public GameObject wagon;
     void Awake()
     {
         instance = this;
@@ -16,7 +17,7 @@ public class LookAtManager : MonoBehaviour
     {
         foreach(GameObject go in decors)
         {
-            //Appliquer lookat
+            go.transform.LookAt(wagon.transform);
         }
     }
 

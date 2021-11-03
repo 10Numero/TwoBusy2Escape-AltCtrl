@@ -12,7 +12,11 @@ public class DecorSpawner : MonoBehaviour
     {
         foreach(Transform t in spawnPoints)
         {
-            //Spawner le decor
+            if (Random.Range(0,100) < spawnProb)
+            {
+                Instantiate(decors[Random.Range(0, decors.Length)], t);
+            }
+            
         }
     }
 }
