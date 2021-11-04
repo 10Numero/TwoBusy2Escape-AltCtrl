@@ -174,7 +174,7 @@ public class PlayerInput : MonoBehaviour
         if (Input.GetKeyDown(LeverLaneLeft))
         {
             LevelGenerator._instance.SwitchLane(true);
-            EventManager.instance.OnSwitchLane.Invoke();
+            EventManager.instance.OnSwitchLane.Invoke(new Vector3(0, 180, 0));
         }
 
     }
@@ -184,7 +184,7 @@ public class PlayerInput : MonoBehaviour
         if (Input.GetKeyDown(LeverLaneRight))
         {
             LevelGenerator._instance.SwitchLane(false);
-            EventManager.instance.OnSwitchLane.Invoke();
+            EventManager.instance.OnSwitchLane.Invoke(Vector3.zero);
         }
 
     }
