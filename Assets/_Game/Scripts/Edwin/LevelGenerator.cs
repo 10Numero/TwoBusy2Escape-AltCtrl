@@ -279,16 +279,14 @@ public class LevelGenerator : MonoBehaviour
         {
             if (!nextSplit.shouldWarn)
             {
-                //EventManager.instance.OnWarningStart.Invoke();
-                Debug.Log(nextSplit.start + " Should Warn");
+                EventManager.instance.OnWarningStart.Invoke();
                 nextSplit.shouldWarn = true;
             }
         }
 
         if (currentSplit != null && currentSplit.shouldWarn && !currentSplit.isWarned)
         {
-            //EventManager.instance.OnWarningStop.Invoke();
-            Debug.Log(currentSplit.start + " Is Warned");
+            EventManager.instance.OnWarningStop.Invoke();
             currentSplit.isWarned = true;
         }
     }
