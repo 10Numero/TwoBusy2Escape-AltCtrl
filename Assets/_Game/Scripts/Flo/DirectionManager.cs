@@ -14,7 +14,7 @@ public class DirectionManager : MonoBehaviour
 
     void Start()
     {
-        EventManager.instance.OnSwitchLane.AddListener(_SwitchDirection);
+        EventManager.instance.OnSwitchLane += _SwitchDirection;
     }
 
     void _SwitchDirection(Vector3 direction)
