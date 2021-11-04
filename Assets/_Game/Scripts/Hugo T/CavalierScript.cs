@@ -40,10 +40,10 @@ public class CavalierScript : MonoBehaviour
     void Update()
     {
         // Temporary
-        if (Input.GetKeyDown(KeyCode.N))
-        {
-            CavalierShooting();
-        }
+        //if (Input.GetKeyDown(KeyCode.N))
+        //{
+        //    CavalierShooting();
+        //}
     }
 
     public void CavalierShooting()
