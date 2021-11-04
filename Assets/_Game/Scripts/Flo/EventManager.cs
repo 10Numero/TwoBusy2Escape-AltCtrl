@@ -11,6 +11,7 @@ public class EventManager : MonoBehaviour
     public UnityEvent OnGameWin;
     public UnityEvent OnGameLoose;
     public UnityEvent OnLostOneLife;
+    public UnityEvent OnSwitchLane;
     public UnityAction<bool> DidPlayerDodged;
     public UnityAction<int> OnDisplaysLengthChanged;
 
@@ -27,6 +28,7 @@ public class EventManager : MonoBehaviour
         OnWarningStop.AddListener(_WarningStop);
         OnDisplaysLengthChanged += _DisplaysUpdate;
         DidPlayerDodged += _DidPlayerDodged;
+        OnSwitchLane.AddListener(_SwitchLane);
     }
 
     private void Start()
@@ -70,6 +72,11 @@ public class EventManager : MonoBehaviour
     }
 
     void _DidPlayerDodged(bool dodged)
+    {
+
+    }
+
+    void _SwitchLane()
     {
 
     }

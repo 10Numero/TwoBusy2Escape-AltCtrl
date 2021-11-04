@@ -72,7 +72,7 @@ public class SheriffFireController : MonoBehaviour
             {
                 if(!stage3)
                 {
-
+                    EventManager.instance.OnSheriffShoot.Invoke();
 
                     stage3 = true;
                 }

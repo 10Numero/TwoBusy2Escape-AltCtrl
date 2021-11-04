@@ -172,13 +172,21 @@ public class PlayerInput : MonoBehaviour
     private void LeverLeftLane()
     {
         if (Input.GetKeyDown(LeverLaneLeft))
+        {
             LevelGenerator._instance.SwitchLane(true);
+            EventManager.instance.OnSwitchLane.Invoke();
+        }
+
     }
 
     private void LeverRightLane()
     {
         if (Input.GetKeyDown(LeverLaneRight))
+        {
             LevelGenerator._instance.SwitchLane(false);
+            EventManager.instance.OnSwitchLane.Invoke();
+        }
+
     }
     #endregion
 
