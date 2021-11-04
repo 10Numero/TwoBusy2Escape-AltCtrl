@@ -273,25 +273,23 @@ public class LevelGenerator : MonoBehaviour
     #region Split Warning
     private void SplitDetectAndWarning()
     {
-        Split nextSplit = NextSplit();
+        Split nextSplit = NextSplit(), currentSplit = CurrentSplit();
 
-        if(nextSplit != null)
+        if (nextSplit != null && Vector3.Distance(path.GetComponent<BGCcCursor>().CalculatePosition(), path.Points[nextSplit.start].PositionWorld) <= (minimumSimpleStraight * simpleStraightPath.transform.Find("_Sand").localScale.z))
         {
-            if (Vector3.Distance(path.GetComponent<BGCcCursor>().CalculatePosition(), path.Points[nextSplit.start].PositionWorld) <= (minimumSimpleStraight * simpleStraightPath.transform.Find("_Sand").localScale.z))
+            if (!nextSplit.shouldWarn)
             {
-                if (!nextSplit.shouldWarn)
-                {
-                    EventManager.instance.OnWarningStart.Invoke();
-                    nextSplit.shouldWarn = true;
-                }
+                //EventManager.instance.OnWarningStart.Invoke();
+                Debug.Log(nextSplit.start + " Should Warn");
+                nextSplit.shouldWarn = true;
             }
+        }
 
-            Split cur = CurrentSplit();
-            if (cur != null && cur.shouldWarn && !cur.isWarned)
-            {
-                EventManager.instance.OnWarningStop.Invoke();
-                cur.isWarned = true;
-            }
+        if (currentSplit != null && currentSplit.shouldWarn && !currentSplit.isWarned)
+        {
+            //EventManager.instance.OnWarningStop.Invoke();
+            Debug.Log(currentSplit.start + " Is Warned");
+            currentSplit.isWarned = true;
         }
     }
 
@@ -301,7 +299,8 @@ public class LevelGenerator : MonoBehaviour
         Split previousSplit = pathSplits[0];
         for (int i = 1; i <= pathSplits.Count; i++)
         {
-            if (i != 0 && currentIndex >= previousSplit.start && currentIndex <= previousSplit.end)   // on est sur un split actuellement
+            int end = previousSplit.end != -1 ? previousSplit.end : path.PointsCount - 1;
+            if (i != 0 && currentIndex >= previousSplit.start && currentIndex <= end)   // on est sur un split actuellement
                 return previousSplit;
             if(i < pathSplits.Count)
                 previousSplit = pathSplits[i];
@@ -310,7 +309,7 @@ public class LevelGenerator : MonoBehaviour
     }
     #endregion
 
-    #region Detect Next split
+    #region Detect Next Split
     private Split NextSplit()
     {
         int currentIndex = path.GetComponent<BGCcMath>().CalcSectionIndexByDistance(path.GetComponent<BGCcCursor>().Distance);
