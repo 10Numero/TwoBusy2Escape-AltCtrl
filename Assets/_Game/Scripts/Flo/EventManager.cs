@@ -43,18 +43,18 @@ public class EventManager : MonoBehaviour
 
     void _LostLife()
     {
-        
+        //Debug.Log("Life One life");
     }
 
     void _WarningStart()
     {
-
+        //Debug.Log("Warning start");
     }
 
 
     void _WarningStop()
     {
-
+        //Debug.Log("Warning Stop");
     }
 
     void _SheriffShoot()

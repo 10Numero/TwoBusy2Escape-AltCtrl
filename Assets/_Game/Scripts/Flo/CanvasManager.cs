@@ -60,6 +60,7 @@ public class CanvasManager : MonoBehaviour
 
     private void _ActiveActualWarning()
     {
+        Debug.Log("Activate Actual Warning");
         warning.gameObject.SetActive(true);
     }
 
