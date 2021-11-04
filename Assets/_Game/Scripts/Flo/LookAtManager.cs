@@ -6,7 +6,7 @@ using UnityEngine;
 public class LookAtManager : MonoBehaviour
 {
     public static LookAtManager instance;
-    private List<GameObject> _decors;
+    public List<GameObject> _decors;
     public GameObject wagon;
 
     void Awake()

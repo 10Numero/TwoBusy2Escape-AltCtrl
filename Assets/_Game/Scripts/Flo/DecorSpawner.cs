@@ -13,7 +13,7 @@ public class DecorSpawner : MonoBehaviour
         foreach(Transform t in spawnPoints)
         {
             if (Random.Range(0,100) < spawnProb)
-                Instantiate(decors[Random.Range(0, decors.Length)], t);
+                Instantiate(decors[Random.Range(0, decors.Length)], t.position, Quaternion.identity);
         }
     }
 }
