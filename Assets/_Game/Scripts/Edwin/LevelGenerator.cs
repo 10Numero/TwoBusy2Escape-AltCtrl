@@ -19,11 +19,16 @@ public class LevelGenerator : MonoBehaviour
     public float straightProbability = 0.9f;
     public float splitStraightProbability = 0.8f;
 
+    public int minimumSimpleStraight = 2;
+    public int minimumSplitStraight = 2;
+
     public BGCurve path;
 
     public float curvature = 0.5f;
 
-    public GameObject straightPath;
+    public GameObject simpleStraightPath;
+    public GameObject splitStraightLeftPath;
+    public GameObject splitStraightRightPath;
     public GameObject leftPath;
     public GameObject rightPath;
 
@@ -45,13 +50,10 @@ public class LevelGenerator : MonoBehaviour
     public static LevelGenerator _instance; 
     void Awake()
     {
-        if (_instance == null)
-        {
-            _instance = this;
-
-            Generate();
-        }
+        if (_instance == null) _instance = this;
         else Destroy(this.gameObject);
+
+        Generate();
     }
 
     #region Generate
@@ -60,7 +62,7 @@ public class LevelGenerator : MonoBehaviour
         if (!path)
             throw new System.Exception("You forgot to select the BGCurve element");
 
-        if (!straightPath || !leftPath || !rightPath)
+        if (!simpleStraightPath || !splitStraightLeftPath || !splitStraightRightPath || !leftPath || !rightPath)
             throw new System.Exception("You forgot to select some path elements");
 
         if(obstacles.Length == 0)
@@ -96,7 +98,8 @@ public class LevelGenerator : MonoBehaviour
         Vector3 parent = Vector3.zero;
         GameObject pathElement = null, leftSplitElement = null, rightSplitElement = null;
 
-        bool isSplit = false, isAtLeastOneStraightOnSplit = false, isAtLeastOneStraigntAfterSplit = false, isObstacleLeftSide = false, isObstacleSpawned = false;
+        bool isSplit = false, isAtLeastSomeStraightOnSplit = false, isAtLeastSomeStraigntAfterSplit = false, isObstacleLeftSide = false, isObstacleSpawned = false;
+        int atLeastStraightAfterSplit = minimumSimpleStraight, atLeastStraightOnSplit = minimumSplitStraight;
 
         int ptIndex = 0;
 
@@ -104,13 +107,13 @@ public class LevelGenerator : MonoBehaviour
         {
             if (!isSplit)
             {
-                if (isAtLeastOneStraigntAfterSplit)
+                if (isAtLeastSomeStraigntAfterSplit)
                 {
                     bool isStraight = Random.value <= straightProbability;  // proba normale
 
                     if (isStraight)
                     {
-                        InstantiateSimpleStraightPath(straightPath, ref pathElement, ref parent, ref cumul, ref ptIndex);
+                        InstantiateSimpleStraightPath(simpleStraightPath, ref pathElement, ref parent, ref cumul, ref ptIndex);
                         pathElement.transform.parent = pathParent;
                     }
                     else
@@ -134,20 +137,26 @@ public class LevelGenerator : MonoBehaviour
                 }
                 else
                 {
-                    InstantiateSimpleStraightPath(straightPath, ref pathElement, ref parent, ref cumul, ref ptIndex);
+                    InstantiateSimpleStraightPath(simpleStraightPath, ref pathElement, ref parent, ref cumul, ref ptIndex);
                     pathElement.transform.parent = pathParent;
-                    isAtLeastOneStraigntAfterSplit = true;
+
+                    atLeastStraightAfterSplit--;
+                    if (atLeastStraightAfterSplit == 0)
+                    {
+                        atLeastStraightAfterSplit = minimumSimpleStraight;
+                        isAtLeastSomeStraigntAfterSplit = true;
+                    }
                 }
             }
             else
             {
-                if (isAtLeastOneStraightOnSplit)
+                if (isAtLeastSomeStraightOnSplit)
                 {
                     bool isStraight = Random.value <= splitStraightProbability; // proba si split
 
                     if (isStraight)
                     {
-                        InstantiateSplitPath(straightPath, straightPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex);
+                        InstantiateSplitPath(splitStraightLeftPath, splitStraightRightPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex);
                         leftSplitElement.transform.parent = pathParent;
                         rightSplitElement.transform.parent = pathParent;
 
@@ -180,18 +189,24 @@ public class LevelGenerator : MonoBehaviour
                         parent = isObstacleLeftSide ? leftSplitElement.transform.Find("end_pos").position : rightSplitElement.transform.Find("end_pos").position;
                         pathElement = isObstacleLeftSide ? leftSplitElement : rightSplitElement;
 
-                        isAtLeastOneStraigntAfterSplit = false;
-                        isAtLeastOneStraightOnSplit = false;
+                        isAtLeastSomeStraigntAfterSplit = false;
+                        isAtLeastSomeStraightOnSplit = false;
                         isObstacleSpawned = false;
                         isSplit = false;
                     }
                 }
                 else
                 {
-                    InstantiateSplitPath(straightPath, straightPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex);
+                    InstantiateSplitPath(splitStraightLeftPath, splitStraightRightPath, isObstacleLeftSide, ref leftSplitElement, ref rightSplitElement, ref cumul, ref ptIndex);
                     leftSplitElement.transform.parent = pathParent;
                     rightSplitElement.transform.parent = pathParent;
-                    isAtLeastOneStraightOnSplit = true;
+
+                    atLeastStraightOnSplit--;
+                    if (atLeastStraightOnSplit == 0)
+                    {
+                        atLeastStraightOnSplit = minimumSplitStraight;
+                        isAtLeastSomeStraightOnSplit = true;
+                    }
                 }
             }
         }
@@ -229,6 +244,7 @@ public class LevelGenerator : MonoBehaviour
     }
     #endregion
 
+    #region Switch Lanes
     public void SwitchLane(bool left)
     {
         int currentIndex = path.GetComponent<BGCcMath>().CalcSectionIndexByDistance(path.GetComponent<BGCcCursor>().Distance);
@@ -255,8 +271,10 @@ public class LevelGenerator : MonoBehaviour
             }
         }
     }
+    #endregion
 }
 
+#region Custom Editor
 #if UNITY_EDITOR
 [CustomEditor(typeof(LevelGenerator))]
 public class MyScriptEditor : Editor
@@ -296,19 +314,26 @@ public class MyScriptEditor : Editor
                     levelGenerator.splitStraightProbability = EditorGUILayout.Slider("Split Path Straight Probability", levelGenerator.splitStraightProbability, 0f, 1f);
 
                     GUILayout.Space(LevelGenerator.VAR_SPACE);
+                    levelGenerator.minimumSimpleStraight = EditorGUILayout.IntSlider("Minimum Simple Straight Paths", levelGenerator.minimumSimpleStraight, 1, 10);
+                    GUILayout.Space(LevelGenerator.VAR_SPACE);
+                    levelGenerator.minimumSplitStraight = EditorGUILayout.IntSlider("Minimum Split Straight Paths", levelGenerator.minimumSplitStraight, 1, 10);
+
+                    GUILayout.Space(LevelGenerator.VAR_SPACE);
                     levelGenerator.path = (BGCurve)EditorGUILayout.ObjectField("BGCurve Path", levelGenerator.path, typeof(BGCurve), true);
-                    if(!levelGenerator.path)
+                    if (!levelGenerator.path)
                         EditorGUILayout.HelpBox("You forgot to select the BGCurve element", MessageType.Warning);
 
                     GUILayout.Space(LevelGenerator.VAR_SPACE);
                     levelGenerator.curvature = EditorGUILayout.Slider("Curvature", levelGenerator.curvature, 0f, 1f);
 
                     GUILayout.Space(LevelGenerator.VAR_SPACE);
-                    levelGenerator.straightPath = (GameObject)EditorGUILayout.ObjectField("Straight Path", levelGenerator.straightPath, typeof(GameObject), true);
+                    levelGenerator.simpleStraightPath = (GameObject)EditorGUILayout.ObjectField("Simple Straight Path", levelGenerator.simpleStraightPath, typeof(GameObject), true);
+                    levelGenerator.splitStraightLeftPath = (GameObject)EditorGUILayout.ObjectField("Split Straight Left Path", levelGenerator.splitStraightLeftPath, typeof(GameObject), true);
+                    levelGenerator.splitStraightRightPath = (GameObject)EditorGUILayout.ObjectField("Split Straight Right Path", levelGenerator.splitStraightRightPath, typeof(GameObject), true);
                     levelGenerator.leftPath = (GameObject)EditorGUILayout.ObjectField("Left Path", levelGenerator.leftPath, typeof(GameObject), true);
                     levelGenerator.rightPath = (GameObject)EditorGUILayout.ObjectField("Right Path", levelGenerator.rightPath, typeof(GameObject), true);
 
-                    if (!levelGenerator.straightPath || !levelGenerator.leftPath || !levelGenerator.rightPath)
+                    if (!levelGenerator.simpleStraightPath || !levelGenerator.splitStraightLeftPath || !levelGenerator.splitStraightRightPath || !levelGenerator.leftPath || !levelGenerator.rightPath)
                         EditorGUILayout.HelpBox("You forgot to select some path elements ", MessageType.Warning);
 
                     serializedObject.Update();
@@ -348,3 +373,4 @@ public class MyScriptEditor : Editor
     }
 }
 #endif
+#endregion

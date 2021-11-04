@@ -3,14 +3,17 @@ using BansheeGz.BGSpline.Components;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Cinemachine;
 
 public class PlayerInput : MonoBehaviour
 {
     [Header("Main Lever and Speed Settings")]
     [SerializeField] private bool constantSpeed = false;
     [SerializeField] private float pushTimeout = 2f;
-    [SerializeField] private float averageSpeed = 0.5f;
+    [SerializeField] private float averageSpeed = 1f;
     [SerializeField] private float maxSpeed = 2.5f;
+    [SerializeField, Range(1f, 5f)] private float syncSpeedGain = 1f;
+    [SerializeField, Range(1f, 5f)] private float periodSpeedGain = 1f;
     [SerializeField] private float friction = 0.625f;
     private float speed = 0f;
     private bool isPushingLever = false, isPushedA = false;
@@ -46,11 +49,21 @@ public class PlayerInput : MonoBehaviour
     [Header("Button 10")]
     [SerializeField] private KeyCode HeadDodge = KeyCode.P;
 
+    private CinemachineVirtualCamera[] vcams;
+
     public static PlayerInput _instance;
     void Awake()
     {
         if (_instance == null) _instance = this;
         else Destroy(this.gameObject);
+
+        vcams = FindObjectsOfType<CinemachineVirtualCamera>();
+        foreach (CinemachineVirtualCamera vcam in vcams)
+        {
+            CinemachineBasicMultiChannelPerlin noiseComp = vcam.GetComponentInChildren<CinemachineBasicMultiChannelPerlin>();
+            if (noiseComp)
+                noiseComp.m_AmplitudeGain = 0f;
+        }
     }
 
     void Update()
@@ -63,20 +76,6 @@ public class PlayerInput : MonoBehaviour
         Dodge();
     }
 
-    #region ChangeLane
-    private void LeverLeftLane()
-    {
-        if (Input.GetKeyDown(LeverLaneLeft))
-            LevelGenerator._instance.SwitchLane(true);
-    }
-
-    private void LeverRightLane()
-    {
-        if (Input.GetKeyDown(LeverLaneRight))
-            LevelGenerator._instance.SwitchLane(false);
-    }
-    #endregion
-
     #region LeverMain
     private void LeverMain()
     {
@@ -84,9 +83,8 @@ public class PlayerInput : MonoBehaviour
         {
             if (Input.GetKey(LeverLeftPlayerA) && Input.GetKey(LeverRightPlayerA) && Input.GetKey(LeverLeftPlayerB) && Input.GetKey(LeverRightPlayerB)) // les mains des 2 joueurs sont sur le levier
             {
-                if (Input.GetKeyDown(LeverDownPlayerA))    // le levier et baissé
+                if (Input.GetKeyDown(LeverDownPlayerA))    // le levier est baissé
                 {
-                    Debug.Log(LeverDownPlayerA);
                     if (timer != 0 && isPushedA)
                         resetSpeed();
 
@@ -95,7 +93,6 @@ public class PlayerInput : MonoBehaviour
                 }
                 else if (Input.GetKeyDown(LeverDownPlayerB))
                 {
-                    Debug.Log(LeverDownPlayerB);
                     if (timer != 0 && !isPushedA)
                         resetSpeed();
 
@@ -114,7 +111,24 @@ public class PlayerInput : MonoBehaviour
                 resetSpeed();
 
             if (speed > 0f)
+            {
                 speed -= friction * Time.deltaTime;
+
+                foreach (CinemachineVirtualCamera vcam in vcams)
+                {
+                    CinemachineBasicMultiChannelPerlin noiseComp = vcam.GetComponentInChildren<CinemachineBasicMultiChannelPerlin>();
+                    if (noiseComp)
+                    {
+                        float capSpeed = Mathf.Clamp(speed, 0f, 1f);
+                        int sign = 1;
+                        if (noiseComp.m_AmplitudeGain > capSpeed)
+                            sign = -1;
+                        float amp = noiseComp.m_AmplitudeGain;
+                        amp += sign * 2f * Time.deltaTime;
+                        noiseComp.m_AmplitudeGain  = amp;
+                    }
+                }
+            }
             else if (speed < 0f)
                 speed = 0f;
         }
@@ -126,14 +140,14 @@ public class PlayerInput : MonoBehaviour
 
     private void setSpeed()
     {
-        if(prevTimer != 0f)
+        if (prevTimer != 0f)
         {
             period = timer + prevTimer;
             delta = Mathf.Abs(timer - prevTimer);
 
-            speed += averageSpeed * (1f + period / pushTimeout) * (1f - delta / period);
+            speed += averageSpeed * (periodSpeedGain + (period / pushTimeout)) * (syncSpeedGain - (delta / period));
 
-            if(speed > maxSpeed)
+            if (speed > maxSpeed)
                 speed = maxSpeed;
 
             prevTimer = 0f;
@@ -152,6 +166,20 @@ public class PlayerInput : MonoBehaviour
         timer = 0f;
         prevTimer = 0f;
         isPushingLever = false;
+    }
+    #endregion
+
+    #region ChangeLane
+    private void LeverLeftLane()
+    {
+        if (Input.GetKeyDown(LeverLaneLeft))
+            LevelGenerator._instance.SwitchLane(true);
+    }
+
+    private void LeverRightLane()
+    {
+        if (Input.GetKeyDown(LeverLaneRight))
+            LevelGenerator._instance.SwitchLane(false);
     }
     #endregion
 
