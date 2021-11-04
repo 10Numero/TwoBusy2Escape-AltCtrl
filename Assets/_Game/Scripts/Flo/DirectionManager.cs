@@ -25,6 +25,22 @@ public class DirectionManager : MonoBehaviour
         }
     }
 
+    public void SwitchLeft()
+    {
+        foreach (GameObject go in _panneaux)
+        {
+            go.transform.localEulerAngles = new Vector3(0, 180, 0);
+        }
+    }
+
+    public void SwitchRight()
+    {
+        foreach (GameObject go in _panneaux)
+        {
+            go.transform.localEulerAngles = Vector3.zero;
+        }
+    }
+
     public void RegisterPanneau(GameObject panneau) => _panneaux.Add(panneau);
     public void UnegisterPanneau(GameObject panneau) => _panneaux.Remove(panneau);
 }
