@@ -48,6 +48,8 @@ public class CavalierScript : MonoBehaviour
 
     public void CavalierShooting()
     {
+        Debug.Log("Shoot");
+
         actualCavalier = Random.Range(0, cavaliers.Length);
         cavaliers[actualCavalier].DOLocalRotate(Vector3.zero, animationSpeed); 
         
