@@ -11,7 +11,8 @@ public class EventManager : MonoBehaviour
     public UnityEvent OnGameWin;
     public UnityEvent OnGameLoose;
     public UnityEvent OnLostOneLife;
-    public UnityEvent OnDisplaysLengthChanged;
+    public UnityAction<bool> DidPlayerDodged;
+    public UnityAction<int> OnDisplaysLengthChanged;
 
     public static EventManager instance;
     void Awake()
@@ -24,17 +25,23 @@ public class EventManager : MonoBehaviour
         OnGameWin.AddListener(_Win);
         OnWarningStart.AddListener(_WarningStart);
         OnWarningStop.AddListener(_WarningStop);
-        OnDisplaysLengthChanged.AddListener(_DisplaysUpdate);
+        OnDisplaysLengthChanged += _DisplaysUpdate;
+        DidPlayerDodged += _DidPlayerDodged;
     }
 
-    void _DisplaysUpdate()
+    private void Start()
     {
-        
+        CanvasManager.instance.UpdateActualUiComponents(Display.displays.Length);
+    }
+
+    void _DisplaysUpdate(int monitorsCount)
+    {
+        Debug.Log("Monitor count changed : " + monitorsCount);
     }
 
     void _LostLife()
     {
-
+        
     }
 
     void _WarningStart()
@@ -62,4 +69,8 @@ public class EventManager : MonoBehaviour
 
     }
 
+    void _DidPlayerDodged(bool dodged)
+    {
+
+    }
 }
