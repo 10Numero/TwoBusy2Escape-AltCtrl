@@ -191,6 +191,8 @@ MonoBehaviour:
   syncSpeedGain: 1
   periodSpeedGain: 1
   friction: 0.4
+  maximumCameraShake: 1
+  cameraShakeAcceleration: 2
   LeverLaneLeft: 122
   LeverLaneRight: 97
   LeverLeftPlayerA: 114

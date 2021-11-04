@@ -15,6 +15,8 @@ public class PlayerInput : MonoBehaviour
     [SerializeField, Range(1f, 5f)] private float syncSpeedGain = 1f;
     [SerializeField, Range(1f, 5f)] private float periodSpeedGain = 1f;
     [SerializeField] private float friction = 0.625f;
+    [SerializeField] private float maximumCameraShake = 1f;
+    [SerializeField] private float cameraShakeAcceleration = 2f;
     private float speed = 0f;
     private bool isPushingLever = false, isPushedA = false;
     private float timer = 0f, prevTimer = 0f, delta = 0f, period = 0f;
@@ -118,15 +120,7 @@ public class PlayerInput : MonoBehaviour
                 {
                     CinemachineBasicMultiChannelPerlin noiseComp = vcam.GetComponentInChildren<CinemachineBasicMultiChannelPerlin>();
                     if (noiseComp)
-                    {
-                        float capSpeed = Mathf.Clamp(speed, 0f, 1f);
-                        int sign = 1;
-                        if (noiseComp.m_AmplitudeGain > capSpeed)
-                            sign = -1;
-                        float amp = noiseComp.m_AmplitudeGain;
-                        amp += sign * 2f * Time.deltaTime;
-                        noiseComp.m_AmplitudeGain  = amp;
-                    }
+                        noiseComp.m_AmplitudeGain  = Mathf.Clamp(noiseComp.m_AmplitudeGain + ((noiseComp.m_AmplitudeGain > Mathf.Clamp(speed, 0f, 1f) ? -1 : 1) * cameraShakeAcceleration * Time.deltaTime), 0f, maximumCameraShake);
                 }
             }
             else if (speed < 0f)
