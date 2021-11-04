@@ -41,6 +41,8 @@ public class CanvasManager : MonoBehaviour
     private void Start()
     {
         EventManager.instance.OnDisplaysLengthChanged += UpdateActualUiComponents;
+        EventManager.instance.OnWarningStart.AddListener(_ActiveActualWarning);
+        EventManager.instance.OnWarningStop.AddListener(_DesactiveActualWarning);
     }
 
     private void Update()
@@ -54,6 +56,16 @@ public class CanvasManager : MonoBehaviour
         {
             s.value = curveCursor.DistanceRatio;
         }
+    }
+
+    private void _ActiveActualWarning()
+    {
+        warning.gameObject.SetActive(true);
+    }
+
+    private void _DesactiveActualWarning()
+    {
+        warning.gameObject.SetActive(false);
     }
 
     public void UpdateActualUiComponents(int monitorsCount)

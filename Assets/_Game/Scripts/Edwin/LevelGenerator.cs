@@ -285,6 +285,8 @@ public class LevelGenerator : MonoBehaviour
                     nextSplit.isWarned = true;
                 }
             }
+
+            EventManager.instance.OnWarningStop.Invoke();
         }
     }
     #endregion

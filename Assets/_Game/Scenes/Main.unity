@@ -1648,8 +1648,8 @@ MonoBehaviour:
   minimumShootDelay: 4
   maximumShootDelay: 10
   initialWait: 10
-  minimumNextWait: 2
-  maximumNextWait: 6
+  minimumNextWait: 8
+  maximumNextWait: 12
   hasDodged: 0
 --- !u!4 &1824398321
 Transform:
