@@ -10,7 +10,10 @@ public class DirectionManager : MonoBehaviour
     void Awake()
     {
         instance = this;
+    }
 
+    void Start()
+    {
         EventManager.instance.OnSwitchLane.AddListener(_SwitchDirection);
     }
 
