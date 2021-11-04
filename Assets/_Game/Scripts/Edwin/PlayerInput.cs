@@ -7,6 +7,7 @@ using UnityEngine;
 public class PlayerInput : MonoBehaviour
 {
     [Header("Main Lever and Speed Settings")]
+    [SerializeField] private bool constantSpeed = false;
     [SerializeField] private float pushTimeout = 2f;
     [SerializeField] private float averageSpeed = 0.5f;
     [SerializeField] private float maxSpeed = 2.5f;
@@ -79,42 +80,48 @@ public class PlayerInput : MonoBehaviour
     #region LeverMain
     private void LeverMain()
     {
-        if (Input.GetKey(LeverLeftPlayerA) && Input.GetKey(LeverRightPlayerA) && Input.GetKey(LeverLeftPlayerB) && Input.GetKey(LeverRightPlayerB)) // les mains des 2 joueurs sont sur le levier
+        if (!constantSpeed)
         {
-            if(Input.GetKeyDown(LeverDownPlayerA))    // le levier et baissé
+            if (Input.GetKey(LeverLeftPlayerA) && Input.GetKey(LeverRightPlayerA) && Input.GetKey(LeverLeftPlayerB) && Input.GetKey(LeverRightPlayerB)) // les mains des 2 joueurs sont sur le levier
             {
-                Debug.Log(LeverDownPlayerA);
-                if(timer != 0 && isPushedA)
-                    resetSpeed();
+                if (Input.GetKeyDown(LeverDownPlayerA))    // le levier et baissé
+                {
+                    Debug.Log(LeverDownPlayerA);
+                    if (timer != 0 && isPushedA)
+                        resetSpeed();
 
-                setSpeed();
-                isPushedA = true;
-            }
-            else if(Input.GetKeyDown(LeverDownPlayerB))
-            {
-                Debug.Log(LeverDownPlayerB);
-                if (timer != 0 && !isPushedA)
-                    resetSpeed();
+                    setSpeed();
+                    isPushedA = true;
+                }
+                else if (Input.GetKeyDown(LeverDownPlayerB))
+                {
+                    Debug.Log(LeverDownPlayerB);
+                    if (timer != 0 && !isPushedA)
+                        resetSpeed();
 
-                setSpeed();
-                isPushedA = false;
-            }
+                    setSpeed();
+                    isPushedA = false;
+                }
 
-            if (isPushingLever)
-            {
-                timer += Time.deltaTime;
-                if (timer > pushTimeout)
-                    resetSpeed();
+                if (isPushingLever)
+                {
+                    timer += Time.deltaTime;
+                    if (timer > pushTimeout)
+                        resetSpeed();
+                }
             }
+            else if (isPushingLever)
+                resetSpeed();
+
+            if (speed > 0f)
+                speed -= friction * Time.deltaTime;
+            else if (speed < 0f)
+                speed = 0f;
         }
-        else if(isPushingLever)
-            resetSpeed();
-
-        if (speed > 0f)
-            speed -= friction * Time.deltaTime;
-        else if (speed < 0f)
-            speed = 0f;
+        else
+            speed = averageSpeed;
         LevelGenerator._instance.path.GetComponent<BGCcTrs>().Speed = speed;
+
     }
 
     private void setSpeed()
