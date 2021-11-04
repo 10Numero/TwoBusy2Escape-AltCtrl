@@ -188,10 +188,17 @@ public class PlayerInput : MonoBehaviour
         if (DodgeHand() && DodgeKnee() && DodgeHead())
         {
             if (!SheriffFireController._instance.hasDodged)
+            {
                 SheriffFireController._instance.hasDodged = true;
+                EventManager.instance.DidPlayerDodged.Invoke(true);
+            }
+
         }
         else if (SheriffFireController._instance.hasDodged)
+        {
             SheriffFireController._instance.hasDodged = false;
+            EventManager.instance.DidPlayerDodged.Invoke(false);
+        }
     }
 
     private bool DodgeHand()
