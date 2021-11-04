@@ -38,7 +38,10 @@ public class LevelGenerator : MonoBehaviour
     private class Split
     {
         public int start, end;
-        public Split(int start) { this.start = start; end = -1; } // end va etre instancié après
+        public bool isWarned;
+
+        public Split(int start) { this.start = start; end = -1; isWarned = false; } // end et isWarned vont etre instancié après
+
     }
     List<Split> pathSplits = new List<Split>();
 
@@ -54,6 +57,11 @@ public class LevelGenerator : MonoBehaviour
         else Destroy(this.gameObject);
 
         Generate();
+    }
+
+    void Update()
+    {
+        SplitDetectAndWarning();
     }
 
     #region Generate
@@ -95,6 +103,7 @@ public class LevelGenerator : MonoBehaviour
         #endregion
 
         float cumul = randomDistance ? Random.Range(minimumDistance, maximumDistance + 1) : totalDistance;
+        totalDistance = (int)cumul; // pour récupérer le random au cas ou
         Vector3 parent = Vector3.zero;
         GameObject pathElement = null, leftSplitElement = null, rightSplitElement = null;
 
@@ -130,7 +139,7 @@ public class LevelGenerator : MonoBehaviour
 
                         AddBGCPoint(isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, false, ref ptIndex);
 
-                        cumul -= leftSplitElement.transform.localScale.z; // assuming equal lengths between left and right
+                        cumul -= leftSplitElement.transform.Find("_Sand").localScale.z; // assuming equal lengths between left and right
 
                         isSplit = true;
                     }
@@ -219,7 +228,6 @@ public class LevelGenerator : MonoBehaviour
             path.Points[path.PointsCount - 1].ControlSecondLocal = new Vector3(0f, 0f, -curvature) * c;
 
         path.AddPoint(new BGCurvePoint(path, position, BGCurvePoint.ControlTypeEnum.BezierIndependant, new Vector3(0f, 0f, curvature) * c, Vector3.zero, false));
-
         ptIndex++;
     }
     
@@ -228,7 +236,7 @@ public class LevelGenerator : MonoBehaviour
         pathElement = Instantiate(prefab, parent, Quaternion.identity);
         parent = pathElement.transform.Find("end_pos").position;
         AddBGCPoint(pathElement.transform.position, true, ref ptIndex);
-        cumul -= pathElement.transform.localScale.z;
+        cumul -= pathElement.transform.transform.Find("_Sand").localScale.z;
     }
 
     private void InstantiateSplitPath(GameObject leftPrefab, GameObject rightPrefab, bool isObstacleLeftSide, ref GameObject leftSplitElement, ref GameObject rightSplitElement, ref float cumul, ref int ptIndex)
@@ -240,25 +248,14 @@ public class LevelGenerator : MonoBehaviour
 
         AddBGCPoint(isObstacleLeftSide ? leftSplitElement.transform.position : rightSplitElement.transform.position, leftPrefab == rightPrefab, ref ptIndex);
 
-        cumul -= leftSplitElement.transform.localScale.z; // assuming equal lengths between left and right
+        cumul -= leftSplitElement.transform.transform.Find("_Sand").localScale.z; // assuming equal lengths between left and right
     }
     #endregion
 
     #region Switch Lanes
     public void SwitchLane(bool left)
     {
-        int currentIndex = path.GetComponent<BGCcMath>().CalcSectionIndexByDistance(path.GetComponent<BGCcCursor>().Distance);
-        Split nextSplit = null;
-        for (int i = 0; i < pathSplits.Count; i++)
-        {
-            if (currentIndex >= pathSplits[i].start && currentIndex <= pathSplits[i].end)   // on est sur un split actuellement
-                return;
-            if (pathSplits[i].start > currentIndex)
-            {
-                nextSplit = pathSplits[i];
-                break;
-            }
-        }
+        Split nextSplit = NextSplit();
 
         if (nextSplit != null)
         {
@@ -270,6 +267,44 @@ public class LevelGenerator : MonoBehaviour
                 cur++;
             }
         }
+    }
+    #endregion
+
+    #region Split Warning
+    private void SplitDetectAndWarning()
+    {
+        Split nextSplit = NextSplit();
+
+        if(nextSplit != null)
+        {
+            if (Vector3.Distance(path.GetComponent<BGCcCursor>().CalculatePosition(), path.Points[nextSplit.start].PositionWorld) <= (minimumSimpleStraight * simpleStraightPath.transform.Find("_Sand").localScale.z))
+            {
+                if(!nextSplit.isWarned)
+                {
+                    EventManager.instance.OnWarningStart.Invoke();
+                    nextSplit.isWarned = true;
+                }
+            }
+        }
+    }
+    #endregion
+
+    #region Detect Next split
+    private Split NextSplit()
+    {
+        int currentIndex = path.GetComponent<BGCcMath>().CalcSectionIndexByDistance(path.GetComponent<BGCcCursor>().Distance);
+        Split nextSplit = null;
+        for (int i = 0; i < pathSplits.Count; i++)
+        {
+            if (currentIndex >= pathSplits[i].start && currentIndex <= pathSplits[i].end)   // on est sur un split actuellement
+                return null;
+            if (pathSplits[i].start > currentIndex)
+            {
+                nextSplit = pathSplits[i];
+                break;
+            }
+        }
+        return nextSplit;
     }
     #endregion
 }
