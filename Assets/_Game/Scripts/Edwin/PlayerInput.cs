@@ -83,6 +83,7 @@ public class PlayerInput : MonoBehaviour
         {
             if(Input.GetKeyDown(LeverDownPlayerA))    // le levier et baissé
             {
+                Debug.Log(LeverDownPlayerA);
                 if(timer != 0 && isPushedA)
                     resetSpeed();
 
@@ -91,6 +92,7 @@ public class PlayerInput : MonoBehaviour
             }
             else if(Input.GetKeyDown(LeverDownPlayerB))
             {
+                Debug.Log(LeverDownPlayerB);
                 if (timer != 0 && !isPushedA)
                     resetSpeed();
 

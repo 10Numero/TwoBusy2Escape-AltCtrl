@@ -16,8 +16,11 @@ public class SheriffFireController : MonoBehaviour
     [SerializeField, Range(MIN_TIME, MAX_TIME)] private int minimumNextWait = 2;
     [SerializeField, Range(MIN_TIME, MAX_TIME)] private int maximumNextWait = 6;
 
-    private float shootDelay;
-    private float nextShotWait;
+    private float shootDelay = 0f;
+    private float nextShotWait = 0f;
+
+    private float stageTime = 0f; // pour ne pas calculer a chaque frame
+    private bool stage1 = false, stage2 = false, stage3 = false;
 
     private bool hasShot = false;
     [HideInInspector] public bool hasDodged = false;
@@ -46,9 +49,7 @@ public class SheriffFireController : MonoBehaviour
         }
         #endregion
 
-        shootDelay = 0;
         nextShotWait = initialWait;    // pour que les joueures s'installe et sont pret
-        nextShotWait = 1;    // pour que les joueures s'installe et sont pret
     }
 
     void Update()
@@ -63,7 +64,36 @@ public class SheriffFireController : MonoBehaviour
                 nextShotWait = Random.Range(minimumNextWait, maximumNextWait + 1);
                 if (!hasDodged)
                     EventManager.instance.OnLostOneLife.Invoke();
-                Debug.Log("Dodged=" + hasDodged + " Wait " + nextShotWait);
+            }
+            #endregion
+
+            #region Shooting Stages
+            if(shootDelay > 0f && shootDelay < stageTime)   // Stage 3 : proche
+            {
+                if(!stage3)
+                {
+
+
+                    stage3 = true;
+                }
+            }
+            else if(shootDelay >= stageTime && shootDelay < shootDelay - stageTime)     // Stage 2 : milieu
+            {
+                if (!stage2)
+                {
+
+
+                    stage2 = true;
+                }
+            }
+            else    // Stage 1 : loin
+            {
+                if (!stage1)
+                {
+
+
+                    stage1 = true;
+                }
             }
             #endregion
         }
@@ -75,8 +105,9 @@ public class SheriffFireController : MonoBehaviour
             {
                 hasShot = true;
                 shootDelay = Random.Range(minimumShootDelay, maximumShootDelay + 1);
+                stageTime = shootDelay / 3.0f;
+                stage1 = stage2 = stage3 = false;
                 EventManager.instance.OnSheriffShoot.Invoke();
-                Debug.Log("Shoot " + shootDelay);
             }
             #endregion
         }

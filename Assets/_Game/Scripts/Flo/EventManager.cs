@@ -16,24 +16,20 @@ public class EventManager : MonoBehaviour
     public static EventManager instance;
     void Awake()
     {
-        if (instance == null)
-        {
-            instance = this;
+        instance = this;
 
-            OnSheriffShoot.AddListener(_SheriffShoot);
-            OnLostOneLife.AddListener(_LostLife);
-            OnGameLoose.AddListener(_Loose);
-            OnGameWin.AddListener(_Win);
-            OnWarningStart.AddListener(_WarningStart);
-            OnWarningStop.AddListener(_WarningStop);
-            OnDisplaysLengthChanged.AddListener(_DisplaysUpdate);
-        }
-        else Destroy(this.gameObject);
+        OnSheriffShoot.AddListener(_SheriffShoot);
+        OnLostOneLife.AddListener(_LostLife);
+        OnGameLoose.AddListener(_Loose);
+        OnGameWin.AddListener(_Win);
+        OnWarningStart.AddListener(_WarningStart);
+        OnWarningStop.AddListener(_WarningStop);
+        OnDisplaysLengthChanged.AddListener(_DisplaysUpdate);
     }
 
     void _DisplaysUpdate()
     {
-
+        
     }
 
     void _LostLife()
