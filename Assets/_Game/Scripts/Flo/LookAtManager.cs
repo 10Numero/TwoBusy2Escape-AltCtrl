@@ -16,8 +16,11 @@ public class LookAtManager : MonoBehaviour
 
     private void Update()
     {
-        foreach(GameObject go in _decors)
-            go.transform.LookAt(wagon.transform);
+        if (_decors != null)
+        {
+            foreach (GameObject go in _decors)
+                go.transform.LookAt(wagon.transform);
+        }
     }
 
     public void Register(GameObject decor) => _decors.Add(decor);
