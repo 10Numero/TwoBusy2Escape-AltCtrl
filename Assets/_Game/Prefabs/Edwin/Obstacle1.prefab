@@ -94,7 +94,7 @@ GameObject:
   - component: {fileID: 68695530795606127}
   - component: {fileID: 5815416431904540880}
   m_Layer: 0
-  m_Name: Obstacle_GO
+  m_Name: Collider
   m_TagString: Obstacle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -107,9 +107,9 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4443178619451068133}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.3, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.7, z: 0.3}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.438, z: -0.3443238}
+  m_LocalScale: {x: 0.68657804, y: 0.9159259, z: 0.27905056}
   m_Children: []
   m_Father: {fileID: 8113155461070723406}
   m_RootOrder: 0

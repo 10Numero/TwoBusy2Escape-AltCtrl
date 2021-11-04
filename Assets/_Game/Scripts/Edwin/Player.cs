@@ -8,7 +8,7 @@ public class Player : MonoBehaviour
     {
         if (other.tag == "Obstacle")
         {
-            Destroy(other.gameObject);
+            Destroy(other.transform.parent.gameObject);
             EventManager.instance.OnLostOneLife.Invoke();
         }
     }
