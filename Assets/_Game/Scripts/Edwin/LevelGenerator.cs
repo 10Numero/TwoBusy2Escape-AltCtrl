@@ -38,9 +38,9 @@ public class LevelGenerator : MonoBehaviour
     private class Split
     {
         public int start, end;
-        public bool isWarned;
+        public bool shouldWarn, isWarned;
 
-        public Split(int start) { this.start = start; end = -1; isWarned = false; } // end et isWarned vont etre instancié après
+        public Split(int start) { this.start = start; end = -1; shouldWarn = false; isWarned = false; } // end et isWarned vont etre instancié après
 
     }
     List<Split> pathSplits = new List<Split>();
@@ -279,15 +279,34 @@ public class LevelGenerator : MonoBehaviour
         {
             if (Vector3.Distance(path.GetComponent<BGCcCursor>().CalculatePosition(), path.Points[nextSplit.start].PositionWorld) <= (minimumSimpleStraight * simpleStraightPath.transform.Find("_Sand").localScale.z))
             {
-                if(!nextSplit.isWarned)
+                if (!nextSplit.shouldWarn)
                 {
                     EventManager.instance.OnWarningStart.Invoke();
-                    nextSplit.isWarned = true;
+                    nextSplit.shouldWarn = true;
                 }
             }
 
-            EventManager.instance.OnWarningStop.Invoke();
+            Split cur = CurrentSplit();
+            if (cur != null && cur.shouldWarn && !cur.isWarned)
+            {
+                EventManager.instance.OnWarningStop.Invoke();
+                cur.isWarned = true;
+            }
         }
+    }
+
+    private Split CurrentSplit()
+    {
+        int currentIndex = path.GetComponent<BGCcMath>().CalcSectionIndexByDistance(path.GetComponent<BGCcCursor>().Distance);
+        Split previousSplit = pathSplits[0];
+        for (int i = 1; i <= pathSplits.Count; i++)
+        {
+            if (i != 0 && currentIndex >= previousSplit.start && currentIndex <= previousSplit.end)   // on est sur un split actuellement
+                return previousSplit;
+            if(i < pathSplits.Count)
+                previousSplit = pathSplits[i];
+        }
+        return null;
     }
     #endregion
 
@@ -295,18 +314,12 @@ public class LevelGenerator : MonoBehaviour
     private Split NextSplit()
     {
         int currentIndex = path.GetComponent<BGCcMath>().CalcSectionIndexByDistance(path.GetComponent<BGCcCursor>().Distance);
-        Split nextSplit = null;
         for (int i = 0; i < pathSplits.Count; i++)
         {
-            if (currentIndex >= pathSplits[i].start && currentIndex <= pathSplits[i].end)   // on est sur un split actuellement
-                return null;
             if (pathSplits[i].start > currentIndex)
-            {
-                nextSplit = pathSplits[i];
-                break;
-            }
+                return pathSplits[i];
         }
-        return nextSplit;
+        return null;
     }
     #endregion
 }
