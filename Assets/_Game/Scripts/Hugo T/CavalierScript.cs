@@ -23,6 +23,9 @@ public class CavalierScript : MonoBehaviour
 
     public Animator animator;
 
+    public Transform smokeGun;
+    public Transform sparkGun;
+
 
     void Start()
     {
@@ -56,6 +59,16 @@ public class CavalierScript : MonoBehaviour
     IEnumerator ReturnCavalier()
     {
         yield return new WaitForSeconds(timeShoot + animationSpeed);
+
+        Transform smokeGunClone;
+        smokeGunClone = Instantiate(smokeGun, viewfinder.transform.position, Quaternion.identity);
+
+        Transform sparkGunClone;
+        sparkGunClone = Instantiate(sparkGun, viewfinder.transform.position, Quaternion.identity);
+
+        Destroy(smokeGunClone.gameObject, 3f);
+        Destroy(sparkGunClone.gameObject, 1.5f);
+
         
         cavaliers[actualCavalier].DOLocalRotate(new Vector3(rotationRange, 0, 0), animationSpeed);
 
@@ -69,6 +82,7 @@ public class CavalierScript : MonoBehaviour
         yield return new WaitForSeconds(animationSpeed);
 
         viewfinder.gameObject.SetActive(true);
+        viewfinder.color = viewfinderColors[0];
         animator.SetInteger("animationIterator", animationIt);
 
         StartCoroutine(ColorChange(timeColorChange1, 1));
