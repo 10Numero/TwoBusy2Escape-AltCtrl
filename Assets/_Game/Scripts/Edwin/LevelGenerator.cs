@@ -324,7 +324,7 @@ public class MyScriptEditor : Editor
                         EditorGUILayout.HelpBox("You forgot to select the BGCurve element", MessageType.Warning);
 
                     GUILayout.Space(LevelGenerator.VAR_SPACE);
-                    levelGenerator.curvature = EditorGUILayout.Slider("Curvature", levelGenerator.curvature, 0f, 1f);
+                    levelGenerator.curvature = EditorGUILayout.Slider("Curvature", levelGenerator.curvature, -5f, 5f);
 
                     GUILayout.Space(LevelGenerator.VAR_SPACE);
                     levelGenerator.simpleStraightPath = (GameObject)EditorGUILayout.ObjectField("Simple Straight Path", levelGenerator.simpleStraightPath, typeof(GameObject), true);

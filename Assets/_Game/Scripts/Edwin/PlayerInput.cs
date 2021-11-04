@@ -128,7 +128,12 @@ public class PlayerInput : MonoBehaviour
         }
         else
             speed = averageSpeed;
-        LevelGenerator._instance.path.GetComponent<BGCcTrs>().Speed = speed;
+
+        BGCcTrs[] cursors = LevelGenerator._instance.path.GetComponents<BGCcTrs>();
+        foreach(BGCcTrs cursor in cursors)
+        {
+            cursor.Speed = speed;
+        }
 
     }
 
