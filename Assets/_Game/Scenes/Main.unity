@@ -1543,6 +1543,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3ff23b600aa4ac54b99212054c954d10, type: 3}
+--- !u!82 &868944811 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 3263907386708384546, guid: 3ff23b600aa4ac54b99212054c954d10,
+    type: 3}
+  m_PrefabInstance: {fileID: 868944810}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &879016203 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3205594341029400490, guid: c51d1faa100a2e540afd6736311f339f,
@@ -2486,7 +2492,8 @@ MonoBehaviour:
     type: 3}
   rightPath: {fileID: 1547800433874325407, guid: 9ac8965f537b27944ae07e96bdd56106,
     type: 3}
-  lanePanel: {fileID: 0}
+  lanePanel: {fileID: 2323027428252779603, guid: 635472da782a58241873afbbb92c16dd,
+    type: 3}
   obstacles:
   - {fileID: 7690937898002984861, guid: da4ec924b1d37c04a8b283fc94a9bbac, type: 3}
   tab: 0
@@ -2967,6 +2974,7 @@ MonoBehaviour:
   minimumNextWait: 8
   maximumNextWait: 12
   hasDodged: 0
+  hitSound: {fileID: 868944811}
 --- !u!4 &1824398321
 Transform:
   m_ObjectHideFlags: 0
