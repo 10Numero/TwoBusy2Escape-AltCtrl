@@ -31,6 +31,7 @@ public class LevelGenerator : MonoBehaviour
     public GameObject splitStraightRightPath;
     public GameObject leftPath;
     public GameObject rightPath;
+    public GameObject lanePanel;
 
     [SerializeField]
     public GameObject[] obstacles;
@@ -44,6 +45,7 @@ public class LevelGenerator : MonoBehaviour
 
     }
     List<Split> pathSplits = new List<Split>();
+    List<Panneau> lanePanels = new List<Panneau>();
 
 #if UNITY_EDITOR
     public const int VAR_SPACE = 6;
@@ -70,7 +72,7 @@ public class LevelGenerator : MonoBehaviour
         if (!path)
             throw new System.Exception("You forgot to select the BGCurve element");
 
-        if (!simpleStraightPath || !splitStraightLeftPath || !splitStraightRightPath || !leftPath || !rightPath)
+        if (!simpleStraightPath || !splitStraightLeftPath || !splitStraightRightPath || !leftPath || !rightPath || !lanePanel)
             throw new System.Exception("You forgot to select some path elements");
 
         if(obstacles.Length == 0)
@@ -134,6 +136,13 @@ public class LevelGenerator : MonoBehaviour
 
                         isObstacleLeftSide = Random.value < 0.5;    // equiprobable
                         isObstacleSpawned = false;
+
+                        GameObject dirPanel = Instantiate(lanePanel, leftSplitElement.transform.position, Quaternion.identity);
+                        lanePanels.Add(dirPanel.GetComponent<Panneau>());
+                        if(isObstacleLeftSide)
+                            lanePanels[lanePanels.Count - 1].ChangeToLeftDirection();
+                        else
+                            lanePanels[lanePanels.Count - 1].ChangeToRightDirection();
 
                         pathSplits.Add(new Split(ptIndex));
 
@@ -259,6 +268,11 @@ public class LevelGenerator : MonoBehaviour
 
         if (nextSplit != null)
         {
+            if(left)
+                lanePanels[pathSplits.IndexOf(nextSplit)].ChangeToLeftDirection();
+            else
+                lanePanels[pathSplits.IndexOf(nextSplit)].ChangeToRightDirection();
+
             int sign = left ? -1 : 1;
             int cur = nextSplit.start + 1;
             while (cur <= nextSplit.end)
@@ -379,8 +393,9 @@ public class MyScriptEditor : Editor
                     levelGenerator.splitStraightRightPath = (GameObject)EditorGUILayout.ObjectField("Split Straight Right Path", levelGenerator.splitStraightRightPath, typeof(GameObject), true);
                     levelGenerator.leftPath = (GameObject)EditorGUILayout.ObjectField("Left Path", levelGenerator.leftPath, typeof(GameObject), true);
                     levelGenerator.rightPath = (GameObject)EditorGUILayout.ObjectField("Right Path", levelGenerator.rightPath, typeof(GameObject), true);
+                    levelGenerator.lanePanel = (GameObject)EditorGUILayout.ObjectField("Selected Lane Panel", levelGenerator.lanePanel, typeof(GameObject), true);
 
-                    if (!levelGenerator.simpleStraightPath || !levelGenerator.splitStraightLeftPath || !levelGenerator.splitStraightRightPath || !levelGenerator.leftPath || !levelGenerator.rightPath)
+                    if (!levelGenerator.simpleStraightPath || !levelGenerator.splitStraightLeftPath || !levelGenerator.splitStraightRightPath || !levelGenerator.leftPath || !levelGenerator.rightPath || !levelGenerator.lanePanel)
                         EditorGUILayout.HelpBox("You forgot to select some path elements ", MessageType.Warning);
 
                     serializedObject.Update();
