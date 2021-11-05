@@ -27,8 +27,6 @@ public class SheriffFireController : MonoBehaviour
 
     public static SheriffFireController _instance;
 
-    public AudioSource hitSound;
-
     void Awake()
     {
         if (_instance == null) _instance = this;
@@ -66,10 +64,7 @@ public class SheriffFireController : MonoBehaviour
                 hasShot = false;
                 nextShotWait = Random.Range(minimumNextWait, maximumNextWait + 1);
                 if (!hasDodged)
-                {
                     EventManager.instance.OnLostOneLife.Invoke();
-                    hitSound.Play();
-                }
             }
             #endregion
 

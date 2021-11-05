@@ -859,6 +859,7 @@ Transform:
   - {fileID: 1691051845}
   - {fileID: 817638980}
   - {fileID: 87986866}
+  - {fileID: 2091119877}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1546,6 +1547,18 @@ PrefabInstance:
 --- !u!82 &868944811 stripped
 AudioSource:
   m_CorrespondingSourceObject: {fileID: 3263907386708384546, guid: 3ff23b600aa4ac54b99212054c954d10,
+    type: 3}
+  m_PrefabInstance: {fileID: 868944810}
+  m_PrefabAsset: {fileID: 0}
+--- !u!82 &868944812 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 7984834000262531011, guid: 3ff23b600aa4ac54b99212054c954d10,
+    type: 3}
+  m_PrefabInstance: {fileID: 868944810}
+  m_PrefabAsset: {fileID: 0}
+--- !u!82 &868944813 stripped
+AudioSource:
+  m_CorrespondingSourceObject: {fileID: 4819120937600753246, guid: 3ff23b600aa4ac54b99212054c954d10,
     type: 3}
   m_PrefabInstance: {fileID: 868944810}
   m_PrefabAsset: {fileID: 0}
@@ -2974,7 +2987,6 @@ MonoBehaviour:
   minimumNextWait: 8
   maximumNextWait: 12
   hasDodged: 0
-  hitSound: {fileID: 868944811}
 --- !u!4 &1824398321
 Transform:
   m_ObjectHideFlags: 0
@@ -3043,6 +3055,52 @@ Canvas:
     type: 3}
   m_PrefabInstance: {fileID: 790891630}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2091119876
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2091119877}
+  - component: {fileID: 2091119878}
+  m_Layer: 0
+  m_Name: SFXManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2091119877
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2091119876}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1395.9983, y: 231.27661, z: 1560.1077}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 592317070}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2091119878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2091119876}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 015816a6eb37226429df2d1ccf636b62, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hitSound: {fileID: 868944811}
+  leverSound: {fileID: 868944812}
+  handcarSound: {fileID: 868944813}
 --- !u!1 &2093333877 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 3205594341590519878, guid: c51d1faa100a2e540afd6736311f339f,
