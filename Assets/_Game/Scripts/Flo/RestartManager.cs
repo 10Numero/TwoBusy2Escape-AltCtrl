@@ -10,6 +10,7 @@ public class RestartManager : MonoBehaviour
     public List<string> objectsToExclude;
 
     public static RestartManager instance;
+    public bool cleanReset;
 
     private void Awake()
     {
@@ -18,16 +19,19 @@ public class RestartManager : MonoBehaviour
 
     public void RestartScene()
     {
-        List<Transform> _roots = new List<Transform>();
-        foreach (Transform transform in FindObjectsOfType<Transform>())
+        if (cleanReset)
         {
-            if (!_roots.Contains(transform.root)) _roots.Add(transform.root);
-        }
+            List<Transform> _roots = new List<Transform>();
+            foreach (Transform transform in FindObjectsOfType<Transform>())
+            {
+                if (!_roots.Contains(transform.root)) _roots.Add(transform.root);
+            }
 
-        foreach (Transform transform in _roots)
-        {
-            if (!objectsToExclude.Contains(transform.name))
-                Destroy(transform.gameObject);
+            foreach (Transform transform in _roots)
+            {
+                if (!objectsToExclude.Contains(transform.name))
+                    Destroy(transform.gameObject);
+            }
         }
 
         SceneManager.LoadScene(SceneToLoad);
