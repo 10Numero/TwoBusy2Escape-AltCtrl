@@ -26,6 +26,8 @@ public class CavalierScript : MonoBehaviour
     public Transform smokeGun;
     public Transform sparkGun;
 
+    public AudioSource[] soundsSFX;
+
 
     void Start()
     {
@@ -37,22 +39,15 @@ public class CavalierScript : MonoBehaviour
         
     }
 
-    void Update()
-    {
-        // Temporary
-        //if (Input.GetKeyDown(KeyCode.N))
-        //{
-        //    CavalierShooting();
-        //}
-    }
-
     public void CavalierShooting()
     {
         Debug.Log("Shoot");
 
         actualCavalier = Random.Range(0, cavaliers.Length);
-        cavaliers[actualCavalier].DOLocalRotate(Vector3.zero, animationSpeed); 
-        
+        cavaliers[actualCavalier].DOLocalRotate(Vector3.zero, animationSpeed);
+
+        soundsSFX[2].Play();
+
         StartCoroutine(StartViewfinderAnim(actualCavalier));
 
         StartCoroutine(ReturnCavalier());
@@ -71,11 +66,13 @@ public class CavalierScript : MonoBehaviour
         Destroy(smokeGunClone.gameObject, 3f);
         Destroy(sparkGunClone.gameObject, 1.5f);
 
-        
+        soundsSFX[0].Play();
+
         cavaliers[actualCavalier].DOLocalRotate(new Vector3(rotationRange, 0, 0), animationSpeed);
 
         viewfinder.gameObject.SetActive(false);
         animator.SetInteger("animationIterator", -1);
+        soundsSFX[2].Stop();
 
     }
 
@@ -86,6 +83,7 @@ public class CavalierScript : MonoBehaviour
         viewfinder.gameObject.SetActive(true);
         viewfinder.color = viewfinderColors[0];
         animator.SetInteger("animationIterator", animationIt);
+        soundsSFX[1].Play();
 
         StartCoroutine(ColorChange(timeColorChange1, 1));
         StartCoroutine(ColorChange(timeColorChange2, 2));
@@ -96,6 +94,7 @@ public class CavalierScript : MonoBehaviour
     {
         yield return new WaitForSeconds(timeColorChange);
         viewfinder.color = viewfinderColors[color];
+        soundsSFX[1].Play();
 
     }
 }
