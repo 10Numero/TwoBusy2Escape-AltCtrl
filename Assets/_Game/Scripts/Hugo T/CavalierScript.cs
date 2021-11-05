@@ -27,6 +27,7 @@ public class CavalierScript : MonoBehaviour
     public Transform sparkGun;
 
     public AudioSource[] soundsSFX;
+    public AudioSource[] stopSFX;
 
 
     void Start()
@@ -47,6 +48,7 @@ public class CavalierScript : MonoBehaviour
         cavaliers[actualCavalier].DOLocalRotate(Vector3.zero, animationSpeed);
 
         soundsSFX[2].Play();
+        stopSFX[actualCavalier].Play();
 
         StartCoroutine(StartViewfinderAnim(actualCavalier));
 
