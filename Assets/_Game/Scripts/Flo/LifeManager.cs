@@ -43,7 +43,7 @@ public class LifeManager : MonoBehaviour
         if (life <= 0)
         {
             Debug.Log("Loose");
-            RestartManager.instance.RestartScene();
+            UnityEngine.SceneManagement.SceneManager.LoadScene("LoseScene");
         }
 
     }

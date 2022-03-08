@@ -65,7 +65,7 @@ public class EventManager : MonoBehaviour
 
     void _Win()
     {
-
+        UnityEngine.SceneManagement.SceneManager.LoadScene("WinScene");
     }
 
     void _Loose()
