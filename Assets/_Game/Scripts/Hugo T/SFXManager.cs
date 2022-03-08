@@ -13,13 +13,9 @@ public class SFXManager : MonoBehaviour
     {
         EventManager.instance.DidPlayerDodged += LostLifeSound;
         EventManager.instance.OnSwitchLane += LeverSound;
+        handcarSound.Play();
+        Destroy(handcarSound, handcarSound.clip.length);
 
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public void LostLifeSound(bool dodged)

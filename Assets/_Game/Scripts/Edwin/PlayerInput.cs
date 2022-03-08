@@ -83,7 +83,8 @@ public class PlayerInput : MonoBehaviour
     {
         if (!constantSpeed)
         {
-            if (Input.GetKey(LeverLeftPlayerA) && Input.GetKey(LeverRightPlayerA) && Input.GetKey(LeverLeftPlayerB) && Input.GetKey(LeverRightPlayerB)) // les mains des 2 joueurs sont sur le levier
+            //if (Input.GetKey(LeverLeftPlayerA) && Input.GetKey(LeverRightPlayerA) && Input.GetKey(LeverLeftPlayerB) && Input.GetKey(LeverRightPlayerB)) // les mains des 2 joueurs sont sur le levier
+            if(true)
             {
                 if (Input.GetKeyDown(LeverDownPlayerA))    // le levier est baissé
                 {
