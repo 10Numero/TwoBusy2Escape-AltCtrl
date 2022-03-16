@@ -137,7 +137,7 @@ public class LevelGenerator : MonoBehaviour
                         isObstacleLeftSide = Random.value < 0.5;    // equiprobable
                         isObstacleSpawned = false;
 
-                        GameObject dirPanel = Instantiate(lanePanel, leftSplitElement.transform.position, Quaternion.identity);
+                        GameObject dirPanel = Instantiate(lanePanel, leftSplitElement.transform.position + Vector3.forward * 2.5f, Quaternion.identity);
                         lanePanels.Add(dirPanel.GetComponent<Panneau>());
                         if(isObstacleLeftSide)
                             lanePanels[lanePanels.Count - 1].ChangeToLeftDirection();
