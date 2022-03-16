@@ -83,7 +83,8 @@ public class PlayerInput : MonoBehaviour
     {
         if (!constantSpeed)
         {
-            if (Input.GetKey(LeverLeftPlayerA) && Input.GetKey(LeverRightPlayerA) && Input.GetKey(LeverLeftPlayerB) && Input.GetKey(LeverRightPlayerB)) // les mains des 2 joueurs sont sur le levier
+            //if (Input.GetKey(LeverLeftPlayerA) && Input.GetKey(LeverRightPlayerA) && Input.GetKey(LeverLeftPlayerB) && Input.GetKey(LeverRightPlayerB)) // les mains des 2 joueurs sont sur le levier
+            if (true) // les mains des 2 joueurs sont sur le levier
             {
                 if (Input.GetKeyDown(LeverDownPlayerA))    // le levier est baissé
                 {
@@ -173,7 +174,7 @@ public class PlayerInput : MonoBehaviour
     {
         if (Input.GetKeyDown(LeverLaneLeft))
         {
-            LevelGenerator._instance.SwitchLane(true);
+            LevelGenerator._instance.SwitchLane();
             EventManager.instance.OnSwitchLane.Invoke(new Vector3(0, 180, 0));
         }
 
@@ -183,7 +184,7 @@ public class PlayerInput : MonoBehaviour
     {
         if (Input.GetKeyDown(LeverLaneRight))
         {
-            LevelGenerator._instance.SwitchLane(false);
+            LevelGenerator._instance.SwitchLane();
             EventManager.instance.OnSwitchLane.Invoke(Vector3.zero);
         }
 

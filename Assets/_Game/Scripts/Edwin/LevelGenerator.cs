@@ -39,9 +39,9 @@ public class LevelGenerator : MonoBehaviour
     private class Split
     {
         public int start, end;
-        public bool shouldWarn, isWarned;
+        public bool shouldWarn, isWarned, isSwitched;
 
-        public Split(int start) { this.start = start; end = -1; shouldWarn = false; isWarned = false; } // end et isWarned vont etre instancié après
+        public Split(int start) { this.start = start; end = -1; shouldWarn = false; isWarned = false; isSwitched = false; } // end et isWarned vont etre instancié après
 
     }
     List<Split> pathSplits = new List<Split>();
@@ -262,16 +262,17 @@ public class LevelGenerator : MonoBehaviour
     #endregion
 
     #region Switch Lanes
-    public void SwitchLane(bool left)
+    public void SwitchLane()
     {
         Split nextSplit = NextSplit();
 
-        if (nextSplit != null)
+        if (nextSplit != null && !nextSplit.isSwitched)
         {
-            if(left)
-                lanePanels[pathSplits.IndexOf(nextSplit)].ChangeToLeftDirection();
-            else
+            bool left = lanePanels[pathSplits.IndexOf(nextSplit)].transform.localEulerAngles != Vector3.zero;
+            if (!left)
                 lanePanels[pathSplits.IndexOf(nextSplit)].ChangeToRightDirection();
+            else
+                lanePanels[pathSplits.IndexOf(nextSplit)].ChangeToLeftDirection();
 
             int sign = left ? -1 : 1;
             int cur = nextSplit.start + 1;
@@ -280,6 +281,8 @@ public class LevelGenerator : MonoBehaviour
                 path.Points[cur].PositionWorld = new Vector3(Mathf.Abs(path.Points[cur].PositionWorld.x) * sign, path.Points[cur].PositionWorld.y, path.Points[cur].PositionWorld.z);
                 cur++;
             }
+
+            nextSplit.isSwitched = true;
         }
     }
     #endregion
