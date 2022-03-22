@@ -8,7 +8,7 @@ public class MultipleScreensDisplay : MonoBehaviour
 
     void Awake()
     {
-        currentDisplayLength = 1;
+        currentDisplayLength = Display.displays.Length;
     }
 
     private void Start()
@@ -18,6 +18,7 @@ public class MultipleScreensDisplay : MonoBehaviour
 
     private void Update()
     {
+        //Debug.Log("Display length : " + Display.displays.Length);
         lastDisplayLength = Display.displays.Length;
 
         for (int i = 0; i < cameras.Length; i++)
@@ -30,15 +31,16 @@ public class MultipleScreensDisplay : MonoBehaviour
                 cameras[i].enabled = false;
         }
 
-        if (Input.GetKeyDown(KeyCode.KeypadPlus))
+        if (Input.GetKeyDown(KeyCode.KeypadPlus) || Input.GetKeyDown(KeyCode.P))
         {
-            currentDisplayLength++;
-
-            if (Display.displays.Length > currentDisplayLength)
+            
+            if (Display.displays.Length >= currentDisplayLength)
             {
+                currentDisplayLength++;
                 Debug.Log("Current : " + currentDisplayLength);
-                for (int i = 1; i < currentDisplayLength; i++)
+                for (int i = 1; i <currentDisplayLength ; i++)
                 {
+                    Debug.Log("active : " + i);
                     Display.displays[i].Activate();
                 }
             }
@@ -49,7 +51,7 @@ public class MultipleScreensDisplay : MonoBehaviour
             }
         }
         
-        if (Input.GetKeyDown(KeyCode.KeypadMinus))
+        if (Input.GetKeyDown(KeyCode.KeypadMinus) || Input.GetKeyDown(KeyCode.M))
         {
             currentDisplayLength--;
             
